@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option csharp_namespace = "FileService.Protos";
+
+service FileService {
+	rpc UploadFile (UploadFileRequest) returns (UploadFileResponse);
+	rpc DeleteFile (DeleteFileRequest) returns (DeleteFileResponse);
+}
+
+message UploadFileRequest {
+	bytes fileData  =  1;
+	string fileName = 2;
+	string folder = 3;
+	string groupId = 4;
+}
+
+message UploadFileResponse {
+	string url = 1;
+}
+
+message DeleteFileRequest {
+	string publicId = 1;
+}
+
+message DeleteFileResponse {
+	bool success = 1;
+}

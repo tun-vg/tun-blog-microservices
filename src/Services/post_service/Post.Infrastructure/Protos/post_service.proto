@@ -1,0 +1,17 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Post.Infrastructure.Protos";
+
+service PostService {
+    rpc GetPost (GetPostRequest) returns (GetPostResponse);
+}
+
+message GetPostRequest {
+    string postId = 1;
+}
+
+message GetPostResponse {
+    string postId = 1;
+    string authorId = 2;
+    string slug = 3;
+}
