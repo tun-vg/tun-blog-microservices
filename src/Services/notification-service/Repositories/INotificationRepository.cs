@@ -11,5 +11,5 @@ public interface INotificationRepository
 
     Task<bool> DeleteNotificationsByUserId(Guid userId);
 
-    Task<(List<Notification>, int)> GetNotificationsByUserId(Guid userId, int page, int pageSize);
+    Task<(List<Notification>, int, int)> GetNotificationsByUserId(Guid userId, int page, int pageSize);
 }

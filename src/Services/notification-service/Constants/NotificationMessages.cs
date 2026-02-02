@@ -3,9 +3,9 @@
 public class NotificationMessages
 {
 
-    public const string CommentCreated_Vi = "Đã có bình luận mới trên bài viết của bạn.";
-    public const string CommentCreated_En = "You have a new comment on your post.";
+    public const string CommentCreatedVi = "{0} đã bình luận trong bài viết của bạn.";
+    public const string CommentCreatedEn = "{0} commented on your post.";
 
-    public const string LikedComment_Vi = "Đã có lượt thích mới trên bình luận của bạn.";
-    public const string LikedComment_En = "You have a new like on your comment.";
+    public const string CommentLikedVi = "{0} đã thích bình luận của bạn.";
+    public const string CommentLikedEn = "{0} liked your comment.";
 }

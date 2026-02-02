@@ -1,6 +1,9 @@
 using Duende.AccessTokenManagement;
 using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using UserService;
 using UserService.Commons;
 using UserService.Services;
 
@@ -14,14 +17,24 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //DI
-builder.Services.AddSingleton<KeycloakConfiguration>(sp =>
-{
-    var config = new KeycloakConfiguration
-    {
-        Realm = builder.Configuration.GetValue<string>("Keycloak:realm")
-    };
-    return config;
-});
+
+// builder.Services.AddSingleton<KeycloakConfiguration>(sp =>
+// {
+//     var config = new KeycloakConfiguration
+//     {
+//         Realm = builder.Configuration.GetValue<string>("Keycloak:realm")
+//     };
+//     return config;
+// });
+
+// builder.Services.Configure<KeycloakConfiguration>(
+//     builder.Configuration.GetSection(KeycloakConfiguration.SectionName));
+
+builder.Services
+    .AddOptions<KeycloakConfiguration>()
+    .BindConfiguration(KeycloakConfiguration.SectionName)
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
 var options = builder.Configuration.GetKeycloakOptions<KeycloakAdminClientOptions>()!;
 var tokenClientName = ClientCredentialsClientName.Parse("KeycloakAdminClient");
@@ -40,10 +53,35 @@ builder.Services
 builder.Services
     .AddKeycloakAdminHttpClient(builder.Configuration)
     .AddClientCredentialsTokenHandler(tokenClientName);
-builder.Services.AddScoped<IKeycloakService, KeycloakService>();
+builder.Services.AddScoped<IKeycloakUserService, KeycloakUserService>();
 builder.Services.AddKeycloakAdminHttpClient(builder.Configuration);
+builder.Services.AddGrpc();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
+
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<IUserFollowService, UserFollowService>();
+
+builder.Services.AddAutoMapper(typeof(ProfileMapper));
 
 var app = builder.Build();
+
+app.MapGrpcService<UserGrpcService>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -52,7 +90,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseCors("AllowAllOrigins");
+
+app.MapGet("/", () => "This is gRPC UserService");
+
+// Note: UseHttpsRedirection removed to allow gRPC over plain HTTP on port 7083
 
 app.UseAuthorization();
 

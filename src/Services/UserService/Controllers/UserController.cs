@@ -7,21 +7,25 @@ namespace UserService.Controllers;
 [Route("[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly IKeycloakService _keycloakService;
+    private readonly IKeycloakUserService _keycloakUserService;
 
-    public UserController(IKeycloakService keycloakService)
+    public UserController(IKeycloakUserService keycloakUserService)
     {
-        _keycloakService = keycloakService;
+        _keycloakUserService = keycloakUserService;
     }
 
     [HttpGet("get-user")]
     public async Task<IActionResult> GetUser([FromQuery] string username)
     {
-        var user = await _keycloakService.GetUserAsync<object>(username);
-        if (user == null)
+        try
         {
-            return NotFound();
+            var userDto = await _keycloakUserService.GetUserAsync(username);
+
+            return Ok(userDto);
         }
-        return Ok(user);
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
     }
 }

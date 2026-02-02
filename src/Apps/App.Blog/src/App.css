@@ -1,0 +1,56 @@
+#root {
+  /* max-width: 100vw;
+  min-height: 100vh; */
+  /* padding: 2rem; */
+  /* background-color: rgb(185, 185, 185); */
+}
+
+.container-app {
+  padding-left: 15%;
+  padding-right: 15%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.ProseMirror {
+  min-height: 240px;       /* khung tối thiểu */
+  outline: none;           /* bỏ viền xanh khi focus */
+  padding: 12px;           /* khoảng cách trong */
+  cursor: text;            /* con trỏ nhập liệu */
+  white-space: pre-wrap;   /* xuống dòng đúng */
+  word-break: break-word;  /* tránh tràn chữ */
+}
+
+.ProseMirror p {
+  margin: 0; /* bỏ margin mặc định của <p> */
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #9ca3af; /* màu xám placeholder */
+  float: left;
+  pointer-events: none;
+  height: 0;
+}
+
+.comment-branch {
+  position: relative;
+}
+.comment-branch::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: #d1d5db; /* gray-400 */
+}
+.comment-branch::after {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 24px;
+  width: 20px;
+  height: 1px;
+  background-color: #d1d5db;
+}

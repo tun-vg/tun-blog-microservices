@@ -7,6 +7,9 @@ using Post.Infrastructure.Services;
 using Post.Persistence;
 using Post.Persistence.Repositories;
 
+// Enable HTTP/2 unencrypted support for gRPC calls over plain HTTP (required for development)
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

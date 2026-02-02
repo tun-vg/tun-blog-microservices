@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using Post.Contract.Services;
 
 namespace Post.Application.Queries.PostQueries;
 
@@ -16,11 +17,13 @@ public class SearchPostsQueryHandler : IRequestHandler<SearchPostsQuery, PagedRe
 {
     private readonly IPostRepository _postRepository;
     private readonly IMapper _mapper;
+    private readonly IUserGrpcClient _userGrpcClient;
 
-    public SearchPostsQueryHandler(IPostRepository postRepository, IMapper mapper)
+    public SearchPostsQueryHandler(IPostRepository postRepository, IMapper mapper, IUserGrpcClient userGrpcClient)
     {
         _postRepository = postRepository;
         _mapper = mapper;
+        _userGrpcClient = userGrpcClient;
     }
 
     public async Task<PagedResult<Object>> Handle(SearchPostsQuery query, CancellationToken cancellationToken)
@@ -35,7 +38,9 @@ public class SearchPostsQueryHandler : IRequestHandler<SearchPostsQuery, PagedRe
         {
             // call to user service to search users by grpc
             //throw new NotImplementedException("User search is not implemented.");
-            return PagedResult<Object>.Create(new List<object> { }, 0);
+            var users = await _userGrpcClient.SearchUsers(query.Search);
+            var userDtos = _mapper.Map<List<Object>>(users.GetType().GetProperty("Users").GetValue(users));
+            return PagedResult<Object>.Create(_mapper.Map<List<object>>(userDtos), 0);
         }
         else
         {

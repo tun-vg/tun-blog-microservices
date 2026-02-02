@@ -28,7 +28,7 @@ namespace NotificationService.Consumers
                 HostName = _rabbitMqConfig.HostName,
                 Port = _rabbitMqConfig.Port,
                 UserName = _rabbitMqConfig.UserName,
-                Password = _rabbitMqConfig.Password,
+                Password = _rabbitMqConfig.Password
             };
 
             _connection = await factory.CreateConnectionAsync();

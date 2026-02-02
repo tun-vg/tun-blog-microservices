@@ -2,13 +2,13 @@
 
 public class CommentCreatedEvent
 {
-    public Guid CommentId { get; set; }
+    public Guid CommentId { get; set; } = Guid.Empty;
 
-    public Guid PostId { get; set; }
+    public Guid PostId { get; set; } = Guid.Empty;
 
-    public Guid UserId { get; set; }
+    public string UserId { get; set; } = string.Empty;
 
-    public Guid AuthorId { get; set; }
+    public string AuthorId { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }
 }

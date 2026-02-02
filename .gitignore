@@ -6,3 +6,5 @@
 
 # Rider
 .idea/
+
+*.DotSettings.user

@@ -9,5 +9,7 @@ public interface INotificationService
 {
     Task SendNotificationAsync(CommentCreatedEvent commentCreatedEvent);
 
+    Task SendNotificationAsync(CommentLikedEvent commentCreatedEvent);
+
     Task<PagedResult<Notification>> GetNotificationsAsync(Guid userId, int pageNumber, int pageSize);
 }

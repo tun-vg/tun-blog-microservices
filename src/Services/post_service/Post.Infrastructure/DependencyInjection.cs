@@ -24,6 +24,7 @@ public static class DependencyInjection
         //services.AddSingleton<IJsonSerializerOptionsProvider, JsonSerializerOptionsProvider>();
         services.AddSingleton<ICacheVersionManager, RedisCacheVersionManager>();
         services.AddScoped<IFileGrpcClient, FileGrpcClient>();
+        services.AddScoped<IUserGrpcClient, UserGrpcClient>();
 
         // Keycloak Admin Client Configuration
         var options = configuration.GetKeycloakOptions<KeycloakAdminClientOptions>()!;

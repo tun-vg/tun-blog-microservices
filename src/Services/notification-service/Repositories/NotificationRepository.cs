@@ -33,17 +33,21 @@ public class NotificationRepository : INotificationRepository
         return rowDeleted > 0;
     }
 
-    public async Task<(List<Notification>, int)> GetNotificationsByUserId(Guid userId, int page, int pageSize)
+    public async Task<(List<Notification>, int, int)> GetNotificationsByUserId(Guid userId, int page, int pageSize)
     {
         var notifications = await _context.Notifications
             .Where(n => n.UserId == userId)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .AsNoTracking()
+            .OrderByDescending(n => n.CreatedAt)
             .ToListAsync();
         int totalCount = await _context.Notifications.CountAsync(n => n.UserId == userId);
-
-        return (notifications, totalCount);
+        int countUnreadNotifications = await _context.Notifications
+            .AsNoTracking()
+            .Where(n => n.UserId == userId && n.Status == false && n.Disable == false)
+            .CountAsync();
+        return (notifications, totalCount, countUnreadNotifications);
     }
 
     public async Task SaveNotificationAsync(Notification notification)
