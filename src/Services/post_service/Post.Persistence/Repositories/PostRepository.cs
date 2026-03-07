@@ -18,9 +18,11 @@ public class PostRepository : IPostRepository
         _context = context;
     }
 
-    public async Task<(List<Post.Domain.Entities.Post>, int)> GetPostByPage(int page, int pageSize, string? search, string? sortBy, bool isDescending)
+    public async Task<(List<Post.Domain.Entities.Post>, int)> GetPosts(int page, int pageSize, string? search, string? sortBy, bool isDescending)
     {
-        var query = _context.Posts.AsQueryable();
+        var query = _context.Posts
+            .AsNoTracking()
+            .AsQueryable();
 
         if (!string.IsNullOrEmpty(search))
         {
@@ -48,6 +50,7 @@ public class PostRepository : IPostRepository
         }
 
         var result = await query
+            .Include(c => c.Category)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(p => new Post.Domain.Entities.Post
@@ -58,6 +61,7 @@ public class PostRepository : IPostRepository
                 Content = p.Content,
                 AuthorId = p.AuthorId,
                 CategoryId = p.CategoryId,
+                Category = p.Category,
                 Approved = p.Approved,
                 Point = p.Point,
                 UpPoint = p.UpPoint,
@@ -153,7 +157,11 @@ public class PostRepository : IPostRepository
 
     public async Task<List<Post.Domain.Entities.Post>> GetPostsTrending(int month, int year, int size)
     {
-        var posts = await _context.Posts.Take(size).ToListAsync();
+        var posts = await _context.Posts
+            .AsNoTracking()
+            .Include(c => c.Category)
+            .Take(size)
+            .ToListAsync();
         return posts;
     }
 
@@ -217,5 +225,34 @@ public class PostRepository : IPostRepository
 
             return (result, totalCount);
         }
+    }
+
+    public async Task<List<Post.Domain.Entities.Post>> GetTrendingPosts()
+    {
+        const int TARGET_COUNT = 5;
+        var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
+        
+        var trendingPosts = await _context.Posts
+            .AsNoTracking()
+            .Where(p => p.CreatedAt >= oneWeekAgo)
+            .OrderByDescending(p => (p.UpPoint - p.DownPoint) * 10 + p.ViewCount)
+            .Take(TARGET_COUNT)
+            .ToListAsync();
+
+        if (trendingPosts.Count < TARGET_COUNT)
+        {
+            var missingCount = TARGET_COUNT - trendingPosts.Count;
+
+            var olderPosts = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.CreatedAt < oneWeekAgo)
+                .OrderByDescending(p => (p.UpPoint - p.DownPoint) * 10 + p.ViewCount)
+                .Take(missingCount)
+                .ToListAsync();
+            
+            trendingPosts.AddRange(olderPosts);
+        }
+
+        return trendingPosts;
     }
 }

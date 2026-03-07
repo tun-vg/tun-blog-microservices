@@ -98,7 +98,7 @@ const Header = () => {
                             <div className="w-6">
                                 <Notification />
                             </div>
-                            <button onClick={() => navigate('/post/tao-moi')} className="flex gap-x-1 items-center border-[1px] border-gray-400 rounded-3xl px-4 py-2 select-none">
+                            <button onClick={() => navigate('/post/create')} className="flex gap-x-1 items-center border-[1px] border-gray-400 rounded-3xl px-4 py-2 select-none">
                                 {/* <CiPen /> */}
                                 <RiQuillPenLine />
                                 Viết bài

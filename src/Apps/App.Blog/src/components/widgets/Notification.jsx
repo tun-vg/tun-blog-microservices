@@ -113,31 +113,32 @@ const Notification = () => {
             return;
         }
 
-        console.log(userId);
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("http://localhost:5074/notificationHub", {
-                accessTokenFactory: () => keycloak.token,
-            })
-            .withAutomaticReconnect()
-            .configureLogging(signalR.LogLevel.Information)
-            .build();
+        if (userId) {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("http://localhost:5074/notificationHub", {
+                    accessTokenFactory: () => keycloak.token,
+                })
+                .withAutomaticReconnect()
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
 
-        connection.start()
-            .then(() => {
-                console.log("SignalR Connected with userId:", userId);
+            connection.start()
+                .then(() => {
+                    console.log("SignalR Connected with userId:", userId);
 
-                connection.on("ReceiveNotification", (notification) => {
-                    setDataListNotify(prev => [notification, ...prev]);
-                    setCountUnreadNotify(prev => prev + 1);
-                });
-            })
-            .catch(err => console.error("SignalR error:", err));
+                    connection.on("ReceiveNotification", (notification) => {
+                        setDataListNotify(prev => [notification, ...prev]);
+                        setCountUnreadNotify(prev => prev + 1);
+                    });
+                })
+                .catch(err => console.error("SignalR error:", err));
 
-        return () => {
-            if (connection) {
-                connection.stop();
-            }
-        };
+            return () => {
+                if (connection) {
+                    connection.stop();
+                }
+            };
+        }
     }, [initialized, keycloak.authenticated, userId])
 
     const deleteAllNotifyHandler = () => {

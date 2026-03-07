@@ -1,8 +1,11 @@
+using Hangfire;
+using Hangfire.MySql;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NotificationService;
+using NotificationService.Commons;
 using NotificationService.Consumers;
 using NotificationService.Grpc;
 using NotificationService.Hubs;
@@ -67,15 +70,26 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddSingleton<RabbitMqConfig>(sp =>
 {
-    var config = new RabbitMqConfig
+    var rabbitMqConnection = new RabbitMqConnection()
     {
-        HostName = builder.Configuration.GetValue<string>("RabbitMQ:HostName"),
-        Port = builder.Configuration.GetValue<int>("RabbitMQ:Port"),
-        UserName = builder.Configuration.GetValue<string>("RabbitMQ:UserName"),
-        Password = builder.Configuration.GetValue<string>("RabbitMQ:Password"),
-        ExchangeName = builder.Configuration.GetValue<string>("RabbitMQ:ExchangeName")
+        HostName = builder.Configuration.GetValue<string>("RabbitMQ:Connection:HostName"),
+        Port = builder.Configuration.GetValue<int>("RabbitMQ:Connection:Port"),
+        UserName = builder.Configuration.GetValue<string>("RabbitMQ:Connection:UserName"),
+        Password = builder.Configuration.GetValue<string>("RabbitMQ:Connection:Password")
     };
-    return config;
+
+    var rabbitMqExchange = new RabbitMqExchange()
+    {
+        Content = builder.Configuration.GetValue<string>("RabbitMQ:Exchanges:Content"),
+        Notification = builder.Configuration.GetValue<string>("RabbitMQ:Exchanges:Notification")
+    };
+
+    var rabbitMqConfig = new RabbitMqConfig()
+    {
+        RabbitMqConnection = rabbitMqConnection,
+        RabbitMqExchange = rabbitMqExchange
+    };
+    return rabbitMqConfig;
 });
 
 builder.Services.AddScoped<INotificationService, NotificationService.Services.NotificationService>();
@@ -84,7 +98,43 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IPostService, PostGrpcClient>();
 builder.Services.AddScoped<IUserService, UserGrpcClient>();
 builder.Services.AddSingleton<IUserIdProvider, KeycloakUserIdProvider>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<IUserSubscriptionService, UserSubscriptionService>();
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IRabbitMqProducer, RabbitMqProducer>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+var hangfireConnectionString =  builder.Configuration.GetConnectionString("HangfireConnection");
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseStorage(new MySqlStorage(hangfireConnectionString, new MySqlStorageOptions
+    {
+        // Recommended options for standard production environments
+        TransactionIsolationLevel = System.Transactions.IsolationLevel.ReadCommitted,
+        QueuePollInterval = TimeSpan.FromSeconds(15),
+        JobExpirationCheckInterval = TimeSpan.FromHours(1),
+        CountersAggregateInterval = TimeSpan.FromMinutes(5),
+        PrepareSchemaIfNecessary = true,
+        DashboardJobListLimit = 50000,
+        TransactionTimeout = TimeSpan.FromMinutes(1),
+        TablesPrefix = "Hangfire"
+    })));
+builder.Services.AddHangfireServer();
+
+builder.Services.AddSingleton<MailSettings>(cf =>
+{
+    var MailSettings = new MailSettings()
+    {
+        Mail = builder.Configuration.GetValue<string>("MailSettings:Mail"),
+        DisplayName = builder.Configuration.GetValue<string>("MailSettings:DisplayName"),
+        Password = builder.Configuration.GetValue<string>("MailSettings:Password"),
+        Host = builder.Configuration.GetValue<string>("MailSettings:Host"),
+        Port = builder.Configuration.GetValue<int>("MailSettings:Port")
+    };
+    return MailSettings;
+});
+builder.Services.AddHostedService<SendEmailWeeklyConsumer>();
 
 builder.Services.AddCors(options =>
 {
@@ -114,6 +164,14 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<IEmailService>(
+    "send-weekly-newletter",
+    service => service.PublishMessageEmailAsync(),
+    Cron.Weekly(DayOfWeek.Saturday, 9, 0)
+    );
 
 app.MapControllers();
 

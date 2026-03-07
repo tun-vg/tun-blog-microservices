@@ -72,14 +72,14 @@ const privateRoutes = [
   //   ]
   // },
   {
-    path: 'bai-dang',
+    path: 'post',
     element:
       <Suspense fallback={<div>Loading...</div>}>
         <MainLayout />
       </Suspense>,
     children: [
       {
-        path: 'tao-moi',
+        path: 'create',
         element: <CreatePostPage />,
         access: ['ADMIN', 'USER'],
       },

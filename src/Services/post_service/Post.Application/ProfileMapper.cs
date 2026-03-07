@@ -27,7 +27,8 @@ public class ProfileMapper : AutoMapper.Profile
             .ForMember(dest => dest.UpPoint, opt => opt.MapFrom(src => src.UpPoint))
             .ForMember(dest => dest.DownPoint, opt => opt.MapFrom(src => src.DownPoint))
             .ForMember(dest => dest.ReadingTime, opt => opt.MapFrom(src => src.ReadingTime))
-            .ForMember(dest => dest.ViewCount, opt => opt.MapFrom(src => src.ViewCount));
+            .ForMember(dest => dest.ViewCount, opt => opt.MapFrom(src => src.ViewCount))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category!.Name));
 
         CreateMap<Tag, TagDto>()
             .ForMember(tagDto => tagDto.TagId, opt => opt.MapFrom(src => src.TagId))

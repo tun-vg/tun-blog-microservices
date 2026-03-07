@@ -39,4 +39,24 @@ public class PostGrpcService : PostService.PostServiceBase
         };
         return response;
     }
+
+    public override async Task<GetHostPostWeeklyResponse> GetHostPostWeekly(GetHostPostWeeklyRequest request, ServerCallContext context)
+    {
+        var trendingPosts = await _postRepository.GetTrendingPosts();
+        var posts = new List<Protos.Post>();
+        foreach (var post in trendingPosts)
+        {
+            var Post = new Protos.Post
+            {
+                PostId = post.PostId.ToString(),
+                Title = post.Title,
+                Slug = post.Slug
+            };
+            posts.Add(Post);
+        }
+
+        GetHostPostWeeklyResponse getHostPostWeeklyResponse = new GetHostPostWeeklyResponse();
+        getHostPostWeeklyResponse.Posts.AddRange(posts);
+        return getHostPostWeeklyResponse;
+    }
 }

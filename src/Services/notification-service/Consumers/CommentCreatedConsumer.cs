@@ -25,10 +25,10 @@ namespace NotificationService.Consumers
         {
             var factory = new ConnectionFactory
             {
-                HostName = _rabbitMqConfig.HostName,
-                Port = _rabbitMqConfig.Port,
-                UserName = _rabbitMqConfig.UserName,
-                Password = _rabbitMqConfig.Password
+                HostName = _rabbitMqConfig.RabbitMqConnection.HostName,
+                Port = _rabbitMqConfig.RabbitMqConnection.Port,
+                UserName = _rabbitMqConfig.RabbitMqConnection.UserName,
+                Password = _rabbitMqConfig.RabbitMqConnection.Password
             };
 
             _connection = await factory.CreateConnectionAsync();
@@ -36,11 +36,13 @@ namespace NotificationService.Consumers
 
             //_channel.ExchangeDeclareAsync(_rabbitMqConfig.ExchangeName, ExchangeType.Direct, true, false);
 
-            await _channel.QueueDeclareAsync(queue: "created_comment",
-                                 durable: true,
-                                 exclusive: false,
-                                 autoDelete: false,
-                                 arguments: null);
+            await _channel.QueueDeclareAsync(
+                queue: "created_comment",
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: null
+            );
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
             consumer.ReceivedAsync += async (model, ea) =>
@@ -61,9 +63,11 @@ namespace NotificationService.Consumers
                 await _notificationService.SendNotificationAsync(commentCreatedEvent);
             };
 
-            await _channel.BasicConsumeAsync(queue: "created_comment",
-                                 autoAck: true,
-                                 consumer: consumer);
+            await _channel.BasicConsumeAsync(
+                queue: "created_comment",
+                autoAck: true,
+                consumer: consumer
+            );
         }
 
         public override void Dispose()

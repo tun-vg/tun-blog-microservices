@@ -22,7 +22,7 @@ const PopularPosts = () => {
                 <h1 className='font-bold text-lg'>PHỔ BIẾN TRÊN BLOG</h1>
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     {favPost?.map(p => {
-                        return <div key={p.postId} className='flex gap-x-4 mt-2 mb-2 bg-gray-300' onClick={() => navigate(`/post/${p.postId}/${p.slug}`)}>
+                        return <div key={p.postId} className='flex gap-x-4 mt-2 mb-2 bg-gray-50' onClick={() => navigate(`/post/${p.postId}/${p.slug}`)}>
                             <img src='/notebook.png' 
                                 alt='image' 
                                 className='h-28 w-28' 
@@ -30,11 +30,14 @@ const PopularPosts = () => {
                             <div className='flex flex-col gap-y-1 w-full justify-between'>
                                 <div className=' flex justify-between items-center'>
                                     <div className='flex gap-x-2 items-center'>
-                                        <p className='font-light text-base'>{p.category}</p>
+                                        <p className='font-light text-base'>{p.categoryName}</p>
                                         <div className='bg-gray-400 h-1 w-1 rounded-sm'></div>
                                         <p className='text-gray-400'>{p.readingTime} phút đọc</p>
                                     </div>
-                                    <CiBookmark className='text-gray-400' />
+                                    <CiBookmark 
+                                        className='text-gray-400 w-6 h-6' 
+                                        // onClick={() => handlerBookmarkPost()}    
+                                    />
                                 </div>
                                 <h2 className='font-semibold'>{p.title}</h2>
                                 <p className='font-light text-sm'>{p.content}</p>

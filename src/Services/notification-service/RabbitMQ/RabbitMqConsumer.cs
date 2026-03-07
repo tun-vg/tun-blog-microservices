@@ -20,10 +20,10 @@ public class RabbitMqConsumer : BackgroundService
     {
         var factory = new ConnectionFactory
         {
-            HostName = _rabbitMqConfig.HostName,
-            Port = _rabbitMqConfig.Port,
-            UserName = _rabbitMqConfig.UserName,
-            Password = _rabbitMqConfig.Password,
+            HostName = _rabbitMqConfig.RabbitMqConnection.HostName,
+            Port = _rabbitMqConfig.RabbitMqConnection.Port,
+            UserName = _rabbitMqConfig.RabbitMqConnection.UserName,
+            Password = _rabbitMqConfig.RabbitMqConnection.Password,
         };
 
         _connection = await factory.CreateConnectionAsync();

@@ -8,10 +8,10 @@ service FileService {
 }
 
 message UploadFileRequest {
-	bytes fileData  =  1;
-	string fileName = 2;
+	bytes file_data  =  1;
+	string file_name = 2;
 	string folder = 3;
-	string groupId = 4;
+	string group_id = 4;
 }
 
 message UploadFileResponse {
@@ -19,7 +19,7 @@ message UploadFileResponse {
 }
 
 message DeleteFileRequest {
-	string publicId = 1;
+	string public_id = 1;
 }
 
 message DeleteFileResponse {

@@ -19,6 +19,9 @@ const SearchPostPage = lazy(
 const UserProfilePage = lazy(
   () => import('../../pages/profiles/UserProfilePage')
 );
+const UnSubscribePage = lazy(
+  () => import('../../pages/clients/UnSubscribePage')
+);
 
 const publicRoutes = [
   {
@@ -70,6 +73,19 @@ const publicRoutes = [
       {
         path: ':username',
         element: <UserProfilePage />
+      }
+    ]
+  },
+  {
+    path: '/unSubscribe',
+    element:
+      <Suspense fallback={<div>Loading...</div>}>
+        <MainLayout />
+      </Suspense>,
+    children: [
+      {
+        index: true,
+        element: <UnSubscribePage />
       }
     ]
   }

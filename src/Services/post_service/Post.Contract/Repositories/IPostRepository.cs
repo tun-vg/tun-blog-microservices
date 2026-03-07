@@ -9,7 +9,7 @@ namespace Post.Contract.Repositories;
 public interface IPostRepository
 {
 
-    Task<(List<Post.Domain.Entities.Post>, int)> GetPostByPage(int page, int pageSize, string? search, string? sortBy, bool isDescending);
+    Task<(List<Post.Domain.Entities.Post>, int)> GetPosts(int page, int pageSize, string? search, string? sortBy, bool isDescending);
 
     Task<Post.Domain.Entities.Post> GetPostById(Guid postId);
 
@@ -24,4 +24,6 @@ public interface IPostRepository
     Task<(List<Post.Domain.Entities.Post>, int)> GetPostsByUserId(int page, int pageSize, string userId);
 
     Task<(List<Post.Domain.Entities.Post>, int)> SearchPost(string search, string type, int page, int pageSize);
+    
+    Task<List<Post.Domain.Entities.Post>> GetTrendingPosts();
 }

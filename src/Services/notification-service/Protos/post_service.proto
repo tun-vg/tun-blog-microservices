@@ -4,6 +4,7 @@ option csharp_namespace = "NotificationService.Protos";
 
 service PostService {
   rpc GetPost (GetPostRequest) returns (GetPostResponse);
+  rpc GetHostPostWeekly (GetHostPostWeeklyRequest) returns (GetHostPostWeeklyResponse);
 }
 
 message GetPostRequest {
@@ -14,4 +15,18 @@ message GetPostResponse {
   string post_id = 1;
   string author_id = 2;
   string slug = 3;
+}
+
+message GetHostPostWeeklyRequest {
+  
+}
+
+message GetHostPostWeeklyResponse {
+  repeated Post posts = 1;
+}
+
+message Post {
+  string post_id = 1;
+  string slug = 2;
+  string title = 3;
 }

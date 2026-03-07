@@ -4,14 +4,29 @@ option csharp_namespace = "Post.Infrastructure.Protos";
 
 service PostService {
     rpc GetPost (GetPostRequest) returns (GetPostResponse);
+    rpc GetHostPostWeekly (GetHostPostWeeklyRequest) returns (GetHostPostWeeklyResponse);
 }
 
 message GetPostRequest {
-    string postId = 1;
+    string post_id = 1;
 }
 
 message GetPostResponse {
-    string postId = 1;
-    string authorId = 2;
+    string post_id = 1;
+    string author_id = 2;
     string slug = 3;
+}
+
+message GetHostPostWeeklyRequest {
+    
+}
+
+message GetHostPostWeeklyResponse {
+    repeated Post posts = 1;
+}
+
+message Post {
+    string post_id = 1;
+    string slug = 2;
+    string title = 3;
 }

@@ -19,7 +19,11 @@ public class PostDto
 
     public Guid AuthorId { get; set; }
 
+    public string? AuthorName { get; set; }
+
     public Guid CategoryId { get; set; }
+    
+    public string? CategoryName { get; set; }
 
     public int Approved { get; set; }
 

@@ -21,7 +21,7 @@ public class GetPostsQueryHandler : IRequestHandler<GetPostsQuery, PagedResult<P
     {
         int page = request.Page <= 0 ? 1 : request.Page;
         int pageSize = request.PageSize <= 0 ? 10 : request.PageSize;
-        var (posts, totalCount) = await _postRepository.GetPostByPage(
+        var (posts, totalCount) = await _postRepository.GetPosts(
             page, 
             pageSize, 
             request.Search, 

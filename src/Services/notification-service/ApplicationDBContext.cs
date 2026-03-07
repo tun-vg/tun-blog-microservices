@@ -10,4 +10,6 @@ public class ApplicationDBContext : DbContext
     }
 
     public DbSet<Notification> Notifications { get; set; }
+    
+    public DbSet<UserSubscription> UserSubscriptions { get; set; }
 }

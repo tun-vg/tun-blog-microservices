@@ -61,7 +61,6 @@ const TagManagementPage = () => {
 
     const handleEdit = (tag) => {
         console.log(`Edit item with ID ${tag.tagId}`);
-        // Add your edit logic here
         setIsEditingTag(tag);
         setOpen(true);
     };
