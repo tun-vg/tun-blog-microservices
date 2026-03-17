@@ -1,0 +1,179 @@
+name: tun-blog
+
+services:
+  # =========================
+  # Database
+  # =========================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: tun
+      MYSQL_PASSWORD: 123456789
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mysql-net
+  
+  keycloak-db:
+    image: postgres:13
+    container_name: keycloak-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: supersecretpassword
+    volumes:
+      - keycloak_pgdata:/var/lib/postgresql/data
+    networks:
+      - keycloak-net
+  
+  # =========================
+  # Identity
+  # =========================
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    ports:
+      - "8188:8080"
+    depends_on:
+      - keycloak-db
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: supersecretpassword
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: adminpassword
+      KC_HOSTNAME: localhost
+    command: start-dev
+    volumes:
+      - ./data:/opt/keycloak/data
+    networks:
+      - keycloak-net
+
+  
+
+  # =========================
+  # Services - APIs
+  # =========================
+  post-api:
+    image: ${DOCKERHUB_USERNAME}/post-api:latest
+    container_name: post-api
+    restart: unless-stopped
+    ports:
+      - ${POST_API_PORT):5270
+      - ${POST_GRPC_PORT}:5271
+    depends_on:
+      - mysql 
+    networks:
+      - tun-blog-network
+  
+  user-api:
+    image: ${DOCKERHUB_USERNAME}/user-api:latest
+    container_name: user-api
+    restart: unless-stopped
+    ports:
+      - ${USER_API_PORT}:5087
+      - ${USER_GRPC_PORT}:7083
+    depends_on:
+      - keycloak
+    networks:
+      - tun-blog-network
+  
+  notification-api:
+    image: ${DOCKERHUB_USERNAME}/notification-api:latest
+    container_name: notification-api
+    restart: unless-stopped
+    ports:
+      - ${NOTIFICATION_API_PORT}:5074
+    depends_on:
+      - mysql
+    networks:
+      - tun-blog-network
+  
+  comment-api:
+    image: ${DOCKERHUB_USERNAME}/comment-api:latest
+    container_name: comment-api
+    restart: unless-stopped
+    ports:
+      - ${COMMENT_API_PORT}:5214
+    depends_on:
+      - mysql
+    networks:
+      - tun-blog-network
+  
+  file-api:
+    image: ${DOCKERHUB_USERNAME}/file-api:latest
+    container_name: file-api
+    restart: unless-stopped
+    ports:
+      - ${FILE_API_PORT}:5091
+      - ${FILE_GRPC_PORT}:5001
+    depends_on:
+      - mysql
+    networks:
+      - tun-blog-network
+    
+  api-gateway:
+    image: ${DOCKERHUB_USERNAME}/api-gateway:latest
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - ${API_GATEWAY_PORT}:5225
+    depends_on:
+      - post-api
+      - user-api
+      - notification-api
+      - comment-api
+      - file-api
+    networks:
+      - tun-blog-network
+        
+  # =========================
+  # Cache / Messaging
+  # =========================
+  redis:
+    image: ${REDIS_IMAGE_NAME}
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - ${REDIS_PORT}:6379
+    command: redis-server --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - tun-blog-network
+  
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE_NAME}
+    container_name: rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - ${RABBITMQ_CONNECT_PORT}:5672
+      - ${RABBITMQ_UI_PORT}:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - tun-blog-network
+      
+networks:
+  keycloak-net:
+    driver: bridge
+  mysql-net:
+    driver: bridge
+  tun-blog-network:
+
+volumes:
+  keycloak_pgdata:
+  mysql_data:
+  redis_data:
+  rabbitmq_data:

@@ -18,7 +18,7 @@ public class ApplicationDBContext : DbContext
         if (!optionsBuilder.IsConfigured)
         {
             // If not exists config db in startup Post.API use this config
-            optionsBuilder.UseMySql("Server=localhost;Database=post_service;User=root;Password=123456;",
+            optionsBuilder.UseMySql("Server=mysql;Database=post_service;User=tun;password=123456789;ConvertZeroDateTime=True;",
                 new MySqlServerVersion(new Version(8, 0, 23)));
         }
     }
