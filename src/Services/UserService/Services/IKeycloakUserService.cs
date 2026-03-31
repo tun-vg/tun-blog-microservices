@@ -4,6 +4,7 @@ namespace UserService.Services;
 
 public interface IKeycloakUserService
 {
-    Task<UserDto> GetUserAsync(string username);
-
+    Task<UserDto> GetUserByUserNameAsync(string username);
+    
+    Task<UserDto> GetUserByIdAsync(string userId);
 }

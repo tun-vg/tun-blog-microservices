@@ -26,7 +26,7 @@ public class KeycloakUserService : IKeycloakUserService
         _userFollowService = userFollowService;
     }
 
-    public async Task<UserDto> GetUserAsync(string username)
+    public async Task<UserDto> GetUserByUserNameAsync(string username)
     {
         string realm = _keycloakConfiguration.Realm;
         GetUsersRequestParameters parameters = new()
@@ -37,6 +37,37 @@ public class KeycloakUserService : IKeycloakUserService
         var user = users.FirstOrDefault();
         if (user == null) 
             throw new Exception($"User {username} not found");
+        
+        var userProfileExtend = await _userProfileService.GetUserProfileExtend(user.Id);
+
+        if (userProfileExtend == null)
+        {
+            UserProfileExtend userProfile = new UserProfileExtend
+            {
+                UserId = user.Id,
+                FollowersCount = 0,
+                FollowingCount = 0,
+                AvatarUrl = string.Empty,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+            };
+            userProfileExtend = await _userProfileService.AddUserProfileExtend(userProfile);
+        }
+        
+        var userFollowsDtos = await _userFollowService.GetFollowersAsync(user.Id);
+
+        var userDto = UserMappingExtensions.ToUserDto(user, userProfileExtend, userFollowsDtos);
+
+        return userDto;
+    }
+
+    public async Task<UserDto> GetUserByIdAsync(string userId)
+    {
+        string realm = _keycloakConfiguration.Realm;
+        var user = await _keycloakClient.GetUserAsync(realm, userId);
+        
+        if (user == null) 
+            throw new Exception($"User not found with id: {userId}");
         
         var userProfileExtend = await _userProfileService.GetUserProfileExtend(user.Id);
 

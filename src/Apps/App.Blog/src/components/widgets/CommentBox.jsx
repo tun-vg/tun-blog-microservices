@@ -11,24 +11,23 @@ import { FaAngleDown } from "react-icons/fa";
 import { FcLike } from "react-icons/fc";
 import { toast, ToastContainer } from "react-toastify";
 
-const CommentBox = ({ comment, replyComment }) => {
+const CommentBox = ({ comment }) => {
     const [isReplyComment, setIsReplyComment] = useState(false);
     const [commentReplies, setCommentReplies] = useState(comment.commentReplies || []);
     const [isOpenCommentReply, setIsOpenCommentReply] = useState(false);
     const { handleSubmit, register, reset } = useForm();
-    const { keycloak } = useKeycloak();
+    const { keycloak, initialized } = useKeycloak();
     const [userInfo, setUserInfo] = useState(null);
     const [commentLikedCount, setCommentLikedCount] = useState(comment.likedCount || 0);
     const [commentReactions, setCommentReactions] = useState(comment.commentReactions || []);
 
     useEffect(() => {
-        if (keycloak) {
+        if (initialized && keycloak.authenticated) {
             setUserInfo(keycloak?.tokenParsed);
         }
-    }, [keycloak]);
+    }, [initialized, keycloak]);
 
     const handleReplyCmt = async (commentRep) => {
-        // replyComment(comment, commentRep);
         console.log("Data comment parent", comment);
         console.log("Data comment reply", commentRep);
         commentRep.upperCommentId = comment.commentId;
@@ -137,7 +136,8 @@ const CommentBox = ({ comment, replyComment }) => {
                                     onClick={() => handleLikeComment()}
                                 >
                                     <CiHeart className="text-2xl pt-[2px]" />
-                                </button>}
+                                </button>
+                            }
 
                             <span>{commentLikedCount}</span>
                         </div>
@@ -174,7 +174,7 @@ const CommentBox = ({ comment, replyComment }) => {
 
                         {commentReplies.map((reply) => (
                             <div key={reply.id}>
-                                <CommentBox comment={{ ...reply, isTransientOpenReply: true }} replyComment={replyComment} />
+                                <CommentBox comment={{ ...reply, isTransientOpenReply: true }} />
                             </div>
                         ))}
                     </div>
@@ -185,7 +185,7 @@ const CommentBox = ({ comment, replyComment }) => {
 
                         {commentReplies.map((reply) => (
                             <div key={reply.id}>
-                                <CommentBox comment={{ ...reply, isOpenReply: true }} replyComment={replyComment} />
+                                <CommentBox comment={{ ...reply, isOpenReply: true }} />
                             </div>
                         ))}
                     </div>

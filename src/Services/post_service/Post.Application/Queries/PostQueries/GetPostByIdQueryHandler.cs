@@ -16,23 +16,29 @@ public class GetPostByIdQueryHandler : IRequestHandler<GetPostByIdQuery, Result>
     private readonly IPostRepository _postRepository;
     private readonly IPostTagRepository _postTagRepository;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly IPostVoteRepository _postVoteRepository;
     private readonly IMapper _mapper;
 
-    public GetPostByIdQueryHandler(IPostRepository postRepository, IPostTagRepository postTagRepository, ICategoryRepository categoryRepository, IMapper mapper)
+    public GetPostByIdQueryHandler(IPostRepository postRepository, 
+        IPostTagRepository postTagRepository, 
+        ICategoryRepository categoryRepository, 
+        IPostVoteRepository postVoteRepository,
+        IMapper mapper)
     {
         _postRepository = postRepository;
         _postTagRepository = postTagRepository;
         _categoryRepository = categoryRepository;
+        _postVoteRepository = postVoteRepository;
         _mapper = mapper;
     }
     public async Task<Result> Handle(GetPostByIdQuery request, CancellationToken cancellationToken)
     {
         Post.Domain.Entities.Post post = await _postRepository.GetPostById(request.PostId);
         List<PostTag> postTags = await _postTagRepository.GetPostTagsByPostId(request.PostId);
-        //Category category = await _categoryRepository.GetById(post.CategoryId);
         post.PostTags = postTags;
-        //post.Category.CategoryId = category.CategoryId;
-        //post.Category.Name = category.Name;
+        List<PostVote> postVotes = await _postVoteRepository.GetPostVotes(request.PostId);
+        post.PostVotes = postVotes;
+        
         return Result.Success(post);
     }
 }

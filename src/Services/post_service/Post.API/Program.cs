@@ -22,7 +22,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDBContext>(options =>
 {
     string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+    b => b.MigrationsAssembly("Post.Persistence"));
 });
 
 // config MediatR
@@ -36,6 +37,7 @@ builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPostTagRepository, PostTagRepository>();
+builder.Services.AddScoped<IPostVoteRepository, PostVoteRepository>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddContract();
 

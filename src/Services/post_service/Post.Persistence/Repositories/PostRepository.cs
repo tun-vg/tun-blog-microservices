@@ -12,10 +12,12 @@ namespace Post.Persistence.Repositories;
 public class PostRepository : IPostRepository
 {
     private readonly ApplicationDBContext _context;
+    private readonly IPostVoteRepository _postVoteRepository;
 
-    public PostRepository(ApplicationDBContext context)
+    public PostRepository(ApplicationDBContext context, IPostVoteRepository postVoteRepository)
     {
         _context = context;
+        _postVoteRepository = postVoteRepository;
     }
 
     public async Task<(List<Post.Domain.Entities.Post>, int)> GetPosts(int page, int pageSize, string? search, string? sortBy, bool isDescending)
@@ -78,12 +80,33 @@ public class PostRepository : IPostRepository
 
     public async Task<Post.Domain.Entities.Post> GetPostById(Guid id)
     {
-        var result = await _context.Posts.FindAsync(id);
+        // var result = await _context.Posts.FindAsync(id);
+        var result = await _context.Posts
+            .AsNoTracking()
+            .Where(p => p.PostId == id)
+            .Select(p => new Post.Domain.Entities.Post
+            {
+                PostId = p.PostId,
+                Title = p.Title,
+                Slug = p.Slug,
+                Content = p.Content,
+                AuthorId = p.AuthorId,
+                CategoryId = p.CategoryId,
+                Category = p.Category,
+                Approved = p.Approved,
+                Point = p.Point,
+                UpPoint = p.UpPoint,
+                DownPoint = p.DownPoint,
+                ViewCount = p.ViewCount,
+                ReadingTime = p.ReadingTime,
+                Status = p.Status
+            })
+            .FirstOrDefaultAsync();
         if (result != null)
         {
             return result;
         }
-        else throw new Exception($"Coun't found post by id: {id}");
+        else throw new Exception($"Couldn't found post by id: {id}");
     }
 
     public async Task<bool> DeletePost(Guid id)
@@ -254,5 +277,81 @@ public class PostRepository : IPostRepository
         }
 
         return trendingPosts;
+    }
+
+    public async Task ViewPost(Guid postId)
+    {
+        var post = await _context.Posts.FindAsync(postId);
+        if (post != null)
+        {
+            post.ViewCount++;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<(int, int)> UpVotePost(Guid postId, Guid userId)
+    {
+        return await DoVotePost(postId, userId, 1);
+    }
+
+    public async Task<(int, int)> DownVotePost(Guid postId, Guid userId)
+    {
+        return await DoVotePost(postId, userId, 0);
+    }
+
+    private async Task<(int, int)> DoVotePost(Guid postId, Guid userId, int typeVote)
+    {
+        // 1 = up, 2 = down, 3 = un up, 4 = un down
+        int point = 0, action = 0;
+        var post = await _context.Posts.FindAsync(postId);
+        if (post != null)
+        {
+            var postVost = await _postVoteRepository.GetPostVote(postId, userId, typeVote);
+            if (postVost == null)
+            {
+                if (typeVote == 1)
+                {
+                    post.UpPoint++;
+                    post.Point++;
+                    action = 1;
+                }
+                else if (typeVote == 0)
+                {
+                    post.DownPoint++;
+                    post.Point--;
+                    action = 2;
+                }
+
+                PostVote vote = new PostVote()
+                {
+                    PostId = postId,
+                    UserId = userId,
+                    TypeVote = (byte)typeVote
+                };
+                await _postVoteRepository.AddPostVote(vote);
+            }
+            else
+            {
+                if (typeVote == 1)
+                {
+                    post.UpPoint--;
+                    post.Point--;
+                    action = 3;
+                }
+                else if (typeVote == 0)
+                {
+                    post.DownPoint--;
+                    post.Point++;
+                    action = 4;
+                }
+                await _postVoteRepository.RemovePostVote(postId, userId, typeVote);
+            }
+            
+            await _context.SaveChangesAsync();
+            point = post.Point;
+        }
+        else throw new Exception("Post not found");
+        
+        return (point, action);
     }
 }

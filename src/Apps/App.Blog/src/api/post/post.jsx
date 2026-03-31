@@ -44,3 +44,18 @@ export const searchPost = (search, type, page, pageSize) => {
     const url = `/post-api/post/search?search=${search}&type=${type}&page=${page}&pageSize=${pageSize}`;
     return API.get(url);
 }
+
+export const viewPost = (postId) => {
+    const url = `/post-api/post/view-post/${postId}`;
+    return API.post(url);
+}
+
+export const upVote = (data) => {
+    const url = `/post-api/post/up-vote`;
+    return API.post(url, data)
+}
+
+export const downVote = (data) => {
+    const url = `/post-api/post/down-vote`;
+    return API.post(url, data);
+}

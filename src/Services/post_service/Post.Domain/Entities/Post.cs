@@ -42,6 +42,8 @@ public class Post : BaseEntity
 
     public ICollection<PostTag> PostTags { get; set; } = new List<PostTag>();
     
+    public ICollection<PostVote> PostVotes { get; set; } = new List<PostVote>();
+    
     public Post() { }
 
     public Post(Guid postId, string title, string slug, string content, Guid authorId, Guid categoryId, bool approved, int point, int upPoint, int downPoint, int viewCount, double readingTime, byte status, DateTime? updateAt)

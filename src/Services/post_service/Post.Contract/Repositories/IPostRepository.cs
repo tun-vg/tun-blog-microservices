@@ -26,4 +26,10 @@ public interface IPostRepository
     Task<(List<Post.Domain.Entities.Post>, int)> SearchPost(string search, string type, int page, int pageSize);
     
     Task<List<Post.Domain.Entities.Post>> GetTrendingPosts();
+    
+    Task ViewPost(Guid postId);
+    
+    Task<(int, int)> UpVotePost(Guid postId, Guid userId);
+    
+    Task<(int, int)> DownVotePost(Guid postId, Guid userId);
 }

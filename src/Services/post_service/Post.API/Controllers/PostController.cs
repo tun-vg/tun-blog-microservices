@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Post.API.Dtos;
 using Post.Application.Commands.PostCommands;
@@ -102,6 +103,27 @@ public class PostController : ControllerBase
         };
 
         var result = await _mediator.Send(query);
+        return Ok(result);
+    }
+
+    [HttpPost("view-post/{postId}")]
+    public async Task<IActionResult> ViewPost([FromRoute] string postId)
+    {
+        await _mediator.Send(new ViewPostCommand(Guid.Parse(postId)));
+        return NoContent();
+    }
+
+    [HttpPost("up-vote")]
+    public async Task<IActionResult> UpVotePost([FromBody] UpVotePostCommand upVotePostCommand)
+    {
+        var result = await _mediator.Send(upVotePostCommand);
+        return Ok(result);
+    }
+
+    [HttpPost("down-vote")]
+    public async Task<IActionResult> DownVotePost([FromBody] DownVotePostCommand downVotePostCommand)
+    {
+        var result = await _mediator.Send(downVotePostCommand);
         return Ok(result);
     }
 }

@@ -11,7 +11,7 @@ import { useKeycloak } from "@react-keycloak/web";
 import Popup from "../../components/ui/Popup";
 
 const UserProfilePage = () => {
-    const { keycloak } = useKeycloak();
+    const { keycloak, initialized } = useKeycloak();
     const { username } = useParams();
     const [data, setData] = useState([]);
     const [dataView, setDataView] = useState("post");
