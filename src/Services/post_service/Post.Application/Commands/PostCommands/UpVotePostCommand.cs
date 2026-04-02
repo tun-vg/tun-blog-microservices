@@ -8,4 +8,6 @@ public class UpVotePostCommand : IRequest<VotePostResponse>
     public Guid PostId { get; set; } = Guid.Empty;
 
     public Guid UserId { get; set; } = Guid.Empty;
+    
+    public int Action { get; set; }
 }

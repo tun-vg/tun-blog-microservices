@@ -15,7 +15,7 @@ public class UpVotePostCommandHandler : IRequestHandler<UpVotePostCommand, VoteP
 
     public async Task<VotePostResponse> Handle(UpVotePostCommand request, CancellationToken cancellationToken)
     {
-        var(point, action) = await _postRepository.UpVotePost(request.PostId, request.UserId);
+        var(point, action) = await _postRepository.UpVotePost(request.PostId, request.UserId, request.Action);
         var result = new VotePostResponse()
         {
             Point = point,

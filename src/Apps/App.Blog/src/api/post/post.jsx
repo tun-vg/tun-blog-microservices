@@ -59,3 +59,23 @@ export const downVote = (data) => {
     const url = `/post-api/post/down-vote`;
     return API.post(url, data);
 }
+
+export const addBookMark = (data) => {
+    const url = `/post-api/post/add-book-mark`;
+    return API.post(url, data);
+}
+
+export const removeBookMark = (data) => {
+    const url = `/post-api/post/remove-book-mark`;
+    return API.post(url, data);
+}
+
+export const checkUserBookMarkPost = (data) => {
+    const url = `/post-api/post/check-user-book-mark-post`;
+    return API.get(url, data);
+}
+
+export const getBookMarkPostByUserId = (page, pageSize, userId) => {
+    const url = `/post-api/post/get-book-mark-posts?page=${page}&pageSize=${pageSize}&userId=${userId}`;
+    return API.get(url);
+}

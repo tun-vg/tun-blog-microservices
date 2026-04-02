@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
-import { getPostsByUserId, getPostsTrending } from "../../api/post/post";
+import { getBookMarkPostByUserId, getPostsByUserId, getPostsTrending } from "../../api/post/post";
 import { CiBookmark, CiGrid41 } from "react-icons/ci";
 import { RiQuillPenLine } from "react-icons/ri";
 import { BsCollection, BsEye } from "react-icons/bs";
 import CustomSelect from "../../components/common/Select/CustomSelect";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { followUserAPI, getUserInfoKeyCloakByUserName, unFollowUserAPI } from "../../api/user/user";
 import BackToTopButton from "../../components/common/Button/BackToTopButton";
 import { useKeycloak } from "@react-keycloak/web";
 import Popup from "../../components/ui/Popup";
+import { GoBookmark } from "react-icons/go";
 
 const UserProfilePage = () => {
-    const { keycloak, initialized } = useKeycloak();
     const { username } = useParams();
+    const [searchParams, setSearchParams] = useSearchParams();
+    const currentTab = searchParams.get('tab') || 'createdPosts';
+    const { keycloak, initialized } = useKeycloak();
     const [data, setData] = useState([]);
-    const [dataView, setDataView] = useState("post");
     const [userInfo, setUserInfo] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 15;
@@ -32,12 +34,26 @@ const UserProfilePage = () => {
     }
 
     const getData = async (userId) => {
-        const result = await getPostsByUserId(currentPage, pageSize, userId);
-        setData(result.items);
-        setHasNextPage(result.hasNextPage);
-        setTotalPosts(result.totalCount);
+        const response = await getPostsByUserId(currentPage, pageSize, userId);
+        setData(response.items);
+        setHasNextPage(response.hasNextPage);
+        setTotalPosts(response.totalCount);
     }
 
+    const handleTabChange = (tabName) => {
+        setSearchParams({tab: tabName});
+    }
+
+    const getBookMarkPosts = async () => {
+        const response = await getBookMarkPostByUserId(1, 10, userInfo?.userId);
+        setData(response.items);
+    }
+
+    useEffect(() => {
+        if (currentTab === 'savedPosts') {
+            getBookMarkPosts();
+        }
+    }, [currentTab])
 
     useEffect(() => {
         getUserInfo();
@@ -144,7 +160,7 @@ const UserProfilePage = () => {
                         </Popup>
                     </div>
                     
-                    <div className="flex gap-7">
+                    <div className="flex flex-wrap gap-7 max-w-full p-2">
                         <div>
                             {userInfo?.followersCount} <br /> followers
                         </div>
@@ -162,22 +178,32 @@ const UserProfilePage = () => {
                             <div>
                                 <button
                                     className="flex gap-1 items-center px-3 py-2 rounded-sm hover:bg-blue-200"
-                                    onClick={() => setDataView('post')}
+                                    onClick={() => handleTabChange('createdPosts')}
                                 >
                                     <RiQuillPenLine />
                                     Bài viết
                                 </button>
-                                {dataView === 'post' && <div className="h-[2px] w-full bg-blue-500"></div>}
+                                {currentTab === 'createdPosts' && <div className="h-[2px] w-full bg-blue-500"></div>}
                             </div>
                             <div>
                                 <button
                                     className="flex gap-1 items-center px-3 py-2 rounded-sm hover:bg-blue-200"
-                                    onClick={() => setDataView('series')}
+                                    onClick={() => handleTabChange('series')}
                                 >
                                     <BsCollection />
                                     Series
                                 </button>
-                                {dataView === 'series' && <div className="h-[2px] w-full bg-blue-500"></div>}
+                                {currentTab === 'series' && <div className="h-[2px] w-full bg-blue-500"></div>}
+                            </div>
+                            <div>
+                                <button
+                                    className="flex gap-1 items-center px-3 py-2 rounded-sm hover:bg-blue-200"
+                                    onClick={() => handleTabChange('savedPosts')}
+                                >
+                                    <GoBookmark />
+                                    Đã lưu
+                                </button>
+                                {currentTab === 'savedPosts' && <div className="h-[2px] w-full bg-blue-500"></div>}
                             </div>
                         </div>
                     </div>

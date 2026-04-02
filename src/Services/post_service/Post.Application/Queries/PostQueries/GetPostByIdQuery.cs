@@ -9,7 +9,7 @@ using Post.Contract.Attributes;
 
 namespace Post.Application.Queries.PostQueries;
 
-[Cached("post:{PostId}", 600)]
+// [Cached("post:{PostId}", 600)]
 public class GetPostByIdQuery : IRequest<Result>
 {
     public Guid PostId { get; set; } = Guid.Empty;

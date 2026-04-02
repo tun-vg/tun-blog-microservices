@@ -52,5 +52,10 @@ public class ProfileMapper : AutoMapper.Profile
             .ForMember(c => c.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
             .ForMember(c => c.Name, opt => opt.MapFrom(src => src.Name))
             .ForMember(c => c.Tags, opt => opt.MapFrom(src => src.Tags));
+
+        CreateMap<PostBookMark, PostBookMarkDto>()
+            .ForMember(dest => dest.PostId, opt => opt.MapFrom(src => src.PostId))
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+            .ForMember(dest => dest.CreateAt, opt => opt.MapFrom(src => src.CreatedAt));
     }
 }

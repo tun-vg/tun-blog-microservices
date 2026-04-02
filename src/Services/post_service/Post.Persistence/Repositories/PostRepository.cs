@@ -289,69 +289,171 @@ public class PostRepository : IPostRepository
         }
     }
 
-    public async Task<(int, int)> UpVotePost(Guid postId, Guid userId)
+    public async Task<(int, int)> UpVotePost(Guid postId, Guid userId, int action)
     {
-        return await DoVotePost(postId, userId, 1);
+        return await DoVotePost(postId, userId, action);
     }
 
-    public async Task<(int, int)> DownVotePost(Guid postId, Guid userId)
+    public async Task<(int, int)> DownVotePost(Guid postId, Guid userId, int action)
     {
-        return await DoVotePost(postId, userId, 0);
+        return await DoVotePost(postId, userId, action);
     }
 
-    private async Task<(int, int)> DoVotePost(Guid postId, Guid userId, int typeVote)
+    private async Task<(int, int)> DoVotePost(Guid postId, Guid userId, int action)
     {
         // 1 = up, 2 = down, 3 = un up, 4 = un down
-        int point = 0, action = 0;
+        int point = 0;
         var post = await _context.Posts.FindAsync(postId);
         if (post != null)
         {
-            var postVost = await _postVoteRepository.GetPostVote(postId, userId, typeVote);
-            if (postVost == null)
+            
+            if (action == 1)
             {
-                if (typeVote == 1)
+                var pv = await _postVoteRepository.GetPostVote(postId, userId, 0);
+                if (pv != null)
                 {
                     post.UpPoint++;
-                    post.Point++;
-                    action = 1;
+                    post.DownPoint--;
+                    pv.TypeVote = 1;
                 }
-                else if (typeVote == 0)
+                else
                 {
-                    post.DownPoint++;
-                    post.Point--;
-                    action = 2;
+                    post.UpPoint++;
+                    var postVote = new PostVote()
+                    {
+                        PostVoteId = new Guid(),
+                        PostId = postId,
+                        UserId = userId,
+                        TypeVote = 1,
+                        CreatedAt = DateTime.Now
+                    };
+                    await _context.PostVotes.AddAsync(postVote);
                 }
-
-                PostVote vote = new PostVote()
-                {
-                    PostId = postId,
-                    UserId = userId,
-                    TypeVote = (byte)typeVote
-                };
-                await _postVoteRepository.AddPostVote(vote);
             }
-            else
+
+            if (action == 2)
             {
-                if (typeVote == 1)
+                var pv = await _postVoteRepository.GetPostVote(postId, userId, 1);
+                if (pv != null)
                 {
                     post.UpPoint--;
-                    post.Point--;
-                    action = 3;
+                    post.DownPoint++;
+                    pv.TypeVote = 0;
                 }
-                else if (typeVote == 0)
+                else
                 {
-                    post.DownPoint--;
-                    post.Point++;
-                    action = 4;
+                    post.DownPoint++;
+                    var postVote = new PostVote()
+                    {
+                        PostVoteId = new Guid(),
+                        PostId = postId,
+                        UserId = userId,
+                        TypeVote = 0,
+                        CreatedAt = DateTime.Now
+                    };
+                    await _context.PostVotes.AddAsync(postVote);
                 }
-                await _postVoteRepository.RemovePostVote(postId, userId, typeVote);
             }
-            
+
+            if (action == 3)
+            {
+                post.UpPoint--;
+                var postVost = await _postVoteRepository.GetPostVote(postId, userId, 1);
+                if (postVost != null) _context.PostVotes.Remove(postVost);
+            }
+
+            if (action == 4)
+            {
+                post.DownPoint--;
+                var postVost = await _postVoteRepository.GetPostVote(postId, userId, 0);
+                if (postVost != null) _context.PostVotes.Remove(postVost);
+            }
+
+            post.Point = post.UpPoint - post.DownPoint;
             await _context.SaveChangesAsync();
             point = post.Point;
         }
         else throw new Exception("Post not found");
         
         return (point, action);
+    }
+
+    public async Task<bool> AddBookMarkPost(Guid postId, Guid userId)
+    {
+        var postBookMark = await _context.PostBookMarks
+            .AsNoTracking()
+            .Where(b => b.PostId == postId && b.UserId == userId)
+            .FirstOrDefaultAsync();
+
+        if (postBookMark == null)
+        {
+            var bookMark = new PostBookMark()
+            {
+                PostBookMarkId = Guid.NewGuid(),
+                PostId = postId,
+                UserId = userId,
+                CreatedAt = DateTime.Now
+            };
+            await _context.PostBookMarks.AddAsync(bookMark);
+            return await _context.SaveChangesAsync() > 0;
+        }
+        else return false;
+    }
+
+    public async Task<bool> RemoveBookMarkPost(Guid postId, Guid userId)
+    {
+        var postBookMark = await _context.PostBookMarks
+            .Where(b => b.PostId == postId && b.UserId == userId)
+            .FirstOrDefaultAsync();
+        if (postBookMark != null)
+        {
+            _context.PostBookMarks.Remove(postBookMark);
+            return await _context.SaveChangesAsync() > 0;
+        }
+        else return false;
+    }
+
+    public async Task<bool> CheckUserBookMarkPost(Guid postId, Guid userId)
+    {
+        var postBookMarks = await _context.PostBookMarks
+            .AsNoTracking()
+            .Where(b => b.PostId == postId && b.UserId == userId)
+            .FirstOrDefaultAsync();
+        return postBookMarks != null;
+    }
+
+    public async Task<(List<Post.Domain.Entities.Post>, int)> GetBookMarkPostsByUserId(int page, int pageSize,
+        Guid userId)
+    {
+        var queryable = from pbm in _context.PostBookMarks
+            join p in _context.Posts on pbm.PostId equals p.PostId
+            where pbm.UserId == userId
+            orderby pbm.CreatedAt descending
+            select new Post.Domain.Entities.Post()
+            {
+                PostId = p.PostId,
+                Title = p.Title,
+                Slug = p.Slug,
+                Content = p.Content,
+                AuthorId = p.AuthorId,
+                CategoryId = p.CategoryId,
+                Category = p.Category,
+                Approved = p.Approved,
+                Point = p.Point,
+                UpPoint = p.UpPoint,
+                DownPoint = p.DownPoint,
+                ViewCount = p.ViewCount,
+                ReadingTime = p.ReadingTime,
+                Status = p.Status
+            };
+
+        var posts = await queryable
+            .AsNoTracking()
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        int totalCount = await queryable.AsNoTracking().CountAsync();
+        
+        return (posts, totalCount);
     }
 }

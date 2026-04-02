@@ -131,7 +131,7 @@ const Header = () => {
 
                                             <div className="m-1">
                                                 <DropdownMenuItem
-                                                    onClick={() => navigate(`/user-profile/${keycloak?.tokenParsed?.preferred_username}`)}
+                                                    onClick={() => navigate(`/user-profile/${keycloak?.tokenParsed?.preferred_username}?tab=createdPosts`)}
                                                     className="border-[1px] border-gray-500 rounded-3xl"
                                                 >
                                                     Xem trang cá nhân

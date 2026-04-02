@@ -10,5 +10,5 @@ public interface IPostVoteRepository
     
     Task AddPostVote(PostVote postVote);
     
-    Task RemovePostVote(Guid postId, Guid userId, int type);
+    Task RemovePostVote(Guid postId, Guid userId, int typeVote);
 }

@@ -32,4 +32,6 @@ public class ApplicationDBContext : DbContext
     public DbSet<Tag> Tags { get; set; }
     
     public DbSet<PostVote> PostVotes { get; set; }
+    
+    public DbSet<PostBookMark> PostBookMarks { get; set; }
 }

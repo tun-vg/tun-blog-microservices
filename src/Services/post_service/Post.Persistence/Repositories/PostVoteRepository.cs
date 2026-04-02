@@ -33,9 +33,9 @@ public class PostVoteRepository : IPostVoteRepository
         await _context.SaveChangesAsync();
     }
 
-    public async Task RemovePostVote(Guid postId, Guid userId, int type)
+    public async Task RemovePostVote(Guid postId, Guid userId, int typeVote)
     {
-        var postVost = await _context.PostVotes.Where(v => v.PostId == postId && v.UserId == userId && v.TypeVote == type).FirstOrDefaultAsync();
+        var postVost = await _context.PostVotes.Where(v => v.PostId == postId && v.UserId == userId && v.TypeVote == typeVote).FirstOrDefaultAsync();
         if (postVost != null)
         {
             _context.PostVotes.Remove(postVost);

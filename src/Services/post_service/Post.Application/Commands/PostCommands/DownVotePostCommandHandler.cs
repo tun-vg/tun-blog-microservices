@@ -15,7 +15,7 @@ public class DownVotePostCommandHandler : IRequestHandler<DownVotePostCommand, V
 
     public async Task<VotePostResponse> Handle(DownVotePostCommand request, CancellationToken cancellationToken)
     {
-        var(point, action) = await _postRepository.DownVotePost(request.PostId, request.UserId);
+        var(point, action) = await _postRepository.DownVotePost(request.PostId, request.UserId, request.Action);
         var result = new VotePostResponse()
         {
             Point = point,

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Post.Domain.Entities;
 
 namespace Post.Contract.Repositories;
 
@@ -29,7 +30,15 @@ public interface IPostRepository
     
     Task ViewPost(Guid postId);
     
-    Task<(int, int)> UpVotePost(Guid postId, Guid userId);
+    Task<(int, int)> UpVotePost(Guid postId, Guid userId, int action);
     
-    Task<(int, int)> DownVotePost(Guid postId, Guid userId);
+    Task<(int, int)> DownVotePost(Guid postId, Guid userId, int action);
+    
+    Task<bool> AddBookMarkPost(Guid postId, Guid userId);
+    
+    Task<bool> RemoveBookMarkPost(Guid postId, Guid userId);
+    
+    Task<bool> CheckUserBookMarkPost(Guid postId, Guid userId);
+    
+    Task<(List<Post.Domain.Entities.Post>, int)> GetBookMarkPostsByUserId(int page, int pageSize, Guid userId);
 }

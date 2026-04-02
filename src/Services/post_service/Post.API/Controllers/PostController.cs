@@ -126,4 +126,44 @@ public class PostController : ControllerBase
         var result = await _mediator.Send(downVotePostCommand);
         return Ok(result);
     }
+
+    [HttpPost("add-book-mark")]
+    public async Task<IActionResult> AddBookMarkPost([FromBody] CreateBookMarkPostCommand createBookMarkPostCommand)
+    {
+        var result = await _mediator.Send(createBookMarkPostCommand);
+        return Ok(result);
+    }
+    
+    [HttpPost("remove-book-mark")]
+    public async Task<IActionResult> RemoveBookMarkPost([FromBody] DeleteBookMarkPostCommand deleteBookMarkPostCommand)
+    {
+        var result = await _mediator.Send(deleteBookMarkPostCommand);
+        return Ok(result);
+    }
+
+    [HttpGet("check-user-book-mark-post")]
+    public async Task<IActionResult> GetUsersBookMarkPost([FromQuery] Guid postId, [FromQuery] Guid userId)
+    {
+        var result = await _mediator.Send(new CheckUserBookMarkPostQuery()
+        {
+            PostId = postId,
+            UserId = userId
+        });
+        return Ok(result);
+    }
+
+    [HttpGet("get-book-mark-posts")]
+    public async Task<IActionResult> GetBookMarkPosts(
+        [FromQuery] int page,
+        [FromQuery] int pageSize,
+        [FromQuery] Guid userId)
+    {
+        var result = await _mediator.Send(new GetBookMarkPostsQuery()
+        {
+            Page = page,
+            PageSize = pageSize,
+            UserId = userId
+        });
+        return Ok(result);
+    }
 }

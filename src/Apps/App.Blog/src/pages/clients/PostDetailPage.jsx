@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { downVote, getPostsById, upVote } from "../../api/post/post";
+import { addBookMark, checkUserBookMarkPost, downVote, getPostsById, removeBookMark, upVote } from "../../api/post/post";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useForm } from "react-hook-form";
 import { CiBookmark, CiHeart } from "react-icons/ci";
@@ -10,7 +10,7 @@ import { addComment, getCommentByPostId } from "../../api/comment/comment";
 import { converterTimeToOnlyDate } from "../../utils/handleTimeShow";
 import { toast, ToastContainer } from "react-toastify";
 import { BsCaretUp, BsCaretDown, BsCaretUpFill, BsCaretDownFill } from "react-icons/bs";
-import { GoComment } from "react-icons/go";
+import { GoBookmark, GoBookmarkFill, GoComment } from "react-icons/go";
 import { CiShare2 } from "react-icons/ci";
 import DOMPurify from 'dompurify';
 import useTrackPostView from "../../utils/useTrackPostView";
@@ -35,6 +35,9 @@ const PostDetailPage = () => {
     const [openShare, setOpenShare] = useState(false);
     const [usersVoted, setUsersVoted] = useState(null);
     const [hideSticky, setHideSticky] = useState(false);
+    const [userBookMarkPost, setUserBookMarkPost] = useState(false);
+    const [userUpVotedPost, setUserUpVotedPost] = useState(false);
+    const [userDownVotedPost, setUserDownVotedPost] = useState(false);
 
     const postToolBarRef = useRef(null);
 
@@ -101,9 +104,7 @@ const PostDetailPage = () => {
     }
 
     const getDataComments = async (postId) => {
-        // setDataComments(dataComment);
         var response = await getCommentByPostId(postId, commentHot);
-        // console.log(response);
         setDataComments(response);
     }
 
@@ -139,14 +140,17 @@ const PostDetailPage = () => {
 
         const data = {
             postId: dataPost?.postId,
-            userId: userInfo?.sub
+            userId: userInfo?.sub,
+            action: userUpVotedPost ? 3 : 1
         }
         try {
             const response = await upVote(data);
             setPoint(response.point);
+            setUserUpVotedPost(!userUpVotedPost);
+            setUserDownVotedPost(false);
         }
         catch (err) {
-            toast.error("Đã xảy ra lỗi!")
+            toast.error("Đã xảy ra lỗi!");
         }
     }
 
@@ -155,11 +159,14 @@ const PostDetailPage = () => {
         
         const data = {
             postId: dataPost?.postId,
-            userId: userInfo?.sub
+            userId: userInfo?.sub,
+            action: userDownVotedPost ? 4 : 2
         }
         try {
             const response = await downVote(data);
             setPoint(response.point);
+            setUserUpVotedPost(false);
+            setUserDownVotedPost(!userDownVotedPost);
         }
         catch (err) {
             toast.error("Đã xảy ra lỗi!")
@@ -200,11 +207,10 @@ const PostDetailPage = () => {
             for (let e = 0; e < usersVoted.length; e++) {
                 const v = usersVoted[e];
                 if (v.userId === userId && v.typeVote === 1) {
-                    return true;
+                    setUserUpVotedPost(true);
                 }
             }
         }
-        return false;
     }
 
     const checkUserDownVotedPost = () => {
@@ -213,17 +219,61 @@ const PostDetailPage = () => {
             for (let e = 0; e < usersVoted.length; e++) {
                 const v = usersVoted[e];
                 if (v.userId === userId && v.typeVote === 2) {
-                    return true;
+                    setUserDownVotedPost(true);
                 }
             }
         }
-        return false;
     }
 
     useEffect(() => {
         checkUserUpVotedPost();
         checkUserDownVotedPost();
-    }, [userInfo]);
+    }, [userInfo, usersVoted]);
+
+
+    const handleAddBookMarkPost = async () => {
+        if (!requireLogin()) return;
+
+        const request = {
+            postId: postId,
+            userId: userInfo?.sub
+        }
+
+        const response = await addBookMark(request);
+        if (response) {
+            setUserBookMarkPost(true)
+        }
+    }
+
+    const handleRemoveBookMarkPost = async () => {
+        if (!requireLogin()) return;
+
+        const request = {
+            postId: postId,
+            userId: userInfo?.sub
+        }
+
+        const response = await removeBookMark(request);
+        if (response) {
+            setUserBookMarkPost(false);
+        }
+    }
+
+
+    const handleCheckUserBookMarkPost = async () => {
+        const request = {
+            postId: postId,
+            userId: userInfo?.sub
+        }
+        const response  = await checkUserBookMarkPost(request);
+        setUserBookMarkPost(response);
+    }
+
+    useEffect(() => {
+        if (userInfo){
+            handleCheckUserBookMarkPost();
+        }
+    }, [userInfo])
 
     return (
         <div className="relative">
@@ -232,7 +282,7 @@ const PostDetailPage = () => {
                 ${hideSticky ? "-translate-x-20 opacity-0" : "translate-x-0 opacity-100"}
             `}>
                 <div className="content-center">
-                    {checkUserUpVotedPost()
+                    {userUpVotedPost
                         ? <BsCaretUpFill
                             className="fill-green-500 cursor-pointer hover:scale-125"
                             onClick={() => handleUpVote()}
@@ -243,19 +293,34 @@ const PostDetailPage = () => {
                         />
                     }
                     <div className="text-center">{point}</div>
-                    {checkUserDownVotedPost()
+                    {userDownVotedPost
                         ? <BsCaretDownFill
-                            className="fill-green-500 cursor-pointer hover:scale-125"
-                            onClick={() => handleUpVote()}
+                            className="fill-orange-600 cursor-pointer hover:scale-125"
+                            onClick={() => handleDownVote()}
                         />
                         : <BsCaretDown
                             className="cursor-pointer hover:scale-125"
-                            onClick={() => handleUpVote()}
+                            onClick={() => handleDownVote()}
                         />
                     }
                 </div>
-                <img src='https://lh7-rt.googleusercontent.com/docsz/AD_4nXcvDH5qqP55rOehebEQChMCroH0U6PAvG55-o-eRHARHz1CifVLkoziLUDwE326CSAB4ch6sGHOu2W8BaiInFCfijcCTVCkt6M-LdQ0FnlOAU755T05ZqoIQLAkCPH2E8Glhg3Qnw?key=E_klvQY5pnbczCrBuwbNLg' alt='avatar' className='h-11 w-11 rounded-full' />
-                <CiBookmark className="text-3xl"/>
+                <img 
+                    src={`${authorPostInfo?.avatarUrl}`} 
+                    alt='avatar' 
+                    className='h-11 w-11 rounded-full' 
+                />
+                {userBookMarkPost
+                    ? <GoBookmarkFill
+                        className="text-3xl fill-yellow-400"
+                        onClick={() => handleRemoveBookMarkPost()}
+                    />
+                    : <GoBookmark
+                        className="text-3xl"
+                        onClick={() => handleAddBookMarkPost()}
+                    />
+                }
+                
+                
                 <GoComment 
                     onClick={() => {
                         commentSectionRef?.current?.scrollIntoView({ behavior: 'smooth' })
@@ -328,11 +393,11 @@ const PostDetailPage = () => {
 
                 <div ref={postToolBarRef}>
                     <div
-                        className="flex items-stretch py-2"
+                        className="flex justify-between py-2"
                     >
                         <div className="flex gap-5">
                             <div className="content-center flex gap-1 items-center bg-gray-200 rounded-3xl p-2">
-                                {checkUserUpVotedPost()
+                                {userUpVotedPost
                                     ? <BsCaretUpFill
                                         className="text-2xl fill-green-500 cursor-pointer hover:scale-125"
                                         onClick={() => handleUpVote()}
@@ -343,14 +408,14 @@ const PostDetailPage = () => {
                                     />
                                 }
                                 <div className="text-center">{point}</div>
-                                {checkUserDownVotedPost()
+                                {userDownVotedPost
                                     ? <BsCaretDownFill
-                                        className="text-2xl fill-green-500 cursor-pointer hover:scale-125"
-                                        onClick={() => handleUpVote()}
+                                        className="text-2xl fill-orange-600 cursor-pointer hover:scale-125"
+                                        onClick={() => handleDownVote()}
                                     />
                                     : <BsCaretDown
                                         className="text-2xl cursor-pointer hover:scale-125"
-                                        onClick={() => handleUpVote()}
+                                        onClick={() => handleDownVote()}
                                     />
                                 }
                             </div>
@@ -365,9 +430,18 @@ const PostDetailPage = () => {
                                 <div>{dataPost?.viewCount}</div>
                             </div>
                         </div>
-                        <hr />
-                        <div>
-                            
+                        
+                        <div className="content-center">
+                            {userBookMarkPost
+                                ? <GoBookmarkFill
+                                    className="text-2xl text-gray-600 fill-yellow-400"
+                                    onClick={() => handleRemoveBookMarkPost()}
+                                />
+                                : <GoBookmark
+                                    className="text-2xl text-gray-600"
+                                    onClick={() => handleAddBookMarkPost()}
+                                />
+                            }
                         </div>
                     </div>
 
