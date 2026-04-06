@@ -59,7 +59,7 @@ jobs:
         run: dotnet restore src/Servcies/notification-service/NotificationService.csproj
 
       - name: Build Notification.API
-        run: dotnet build src/Services/notification_service/NotificationService.csproj --configuration Release --no-restore
+        run: dotnet build src/Services/notification-service/NotificationService.csproj --configuration Release --no-restore
 
   build-commnet-api:
     runs-on: ubuntu-latest
