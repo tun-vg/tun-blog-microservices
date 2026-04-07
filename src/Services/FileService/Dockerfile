@@ -8,9 +8,9 @@ EXPOSE 5001
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./FileService.csproj", "FileService/"]
+COPY ["src/Services/FileService/FileService.csproj", "FileService/"]
 RUN dotnet restore "./FileService/FileService.csproj"
-COPY . FileService/
+COPY src/Services/FileService FileService/
 WORKDIR "/src/FileService"
 RUN dotnet build "./FileService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

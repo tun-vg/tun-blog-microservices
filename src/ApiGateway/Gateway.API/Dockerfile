@@ -8,10 +8,10 @@ EXPOSE 5225
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./Gateway.API.csproj", "api-gateway/"]
-RUN dotnet restore "api-gateway/Gateway.API.csproj"
-COPY . api-gateway/
-WORKDIR "/src/api-gateway"
+COPY ["src/ApiGateway/Gateway.API/Gateway.API.csproj", "Gateway.API/"]
+RUN dotnet restore "./Gateway.API/Gateway.API.csproj"
+COPY src/ApiGateway/ .
+WORKDIR "/src/Gateway.API"
 RUN dotnet build "./Gateway.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

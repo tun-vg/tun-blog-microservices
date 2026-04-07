@@ -8,9 +8,9 @@ EXPOSE 5214
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./comment-service.csproj", "comment-service/"]
+COPY ["src/Services/comment_service/comment-service.csproj", "comment-service/"]
 RUN dotnet restore "comment-service/comment-service.csproj"
-COPY . comment-service/
+COPY src/Services/comment_service/ comment-service/
 WORKDIR "/src/comment-service"
 RUN dotnet build "./comment-service.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

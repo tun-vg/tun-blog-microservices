@@ -8,9 +8,9 @@ EXPOSE 5074
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./NotificationService.csproj", "notification-service/"]
+COPY ["src/Services/notification-service/NotificationService.csproj", "notification-service/"]
 RUN dotnet restore "notification-service/NotificationService.csproj"
-COPY . notification-service/
+COPY src/Services/notification-service/ notification-service/
 WORKDIR "/src/notification-service"
 RUN dotnet build "./NotificationService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

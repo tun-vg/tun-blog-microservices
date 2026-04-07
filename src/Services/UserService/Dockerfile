@@ -8,9 +8,9 @@ EXPOSE 7083
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["./UserService.csproj", "user-service/"]
+COPY ["src/Services/UserService/UserService.csproj", "user-service/"]
 RUN dotnet restore "user-service/UserService.csproj"
-COPY . user-service/
+COPY src/Services/UserService/ user-service/
 WORKDIR "/src/user-service"
 RUN dotnet build "./UserService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
