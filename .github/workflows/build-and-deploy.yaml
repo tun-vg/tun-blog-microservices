@@ -1,0 +1,176 @@
+name: Build and deploy .NET services
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      post-api: ${{ steps.filter.outputs.post-api }}
+      user-api: ${{ steps.filter.outputs.user-api }}
+      notification-api: ${{ steps.filter.outputs.notification-api }}
+      comment-api: ${{ steps.filter.outputs.comment-api }}
+      file-api: ${{ steps.filter.outputs.file-api }}
+      api-gateway: ${{ steps.filter.outputs.api-gateway }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            post-api:
+              - 'src/Services/post_service/**'
+            user-api:
+              - 'src/Services/UserService/**'
+            notification-api:
+              - 'src/Services/notification-service/**'
+            comment-api:
+              - 'src/Services/comment_service/**'
+            file-api:
+              - 'src/Services/FileService/**'
+            api-gateway:
+              - 'src/ApiGateway/Gateway.API/**'
+
+  build-post-api:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.post-api == 'true'
+    runs-on: ubuntu-latest
+    environment: Prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/Services/post_service/Dockerfile
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/post-api:latest
+
+  build-user-api:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.user-api == 'true'
+    runs-on: ubuntu-latest
+    environment: Prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/Services/UserService/Dockerfile
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/user-api:latest
+
+  build-notification-api:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.notification-api == 'true'
+    runs-on: ubuntu-latest
+    environment: Prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/Services/notification-service/Dockerfile
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/notification-api:latest
+
+  build-comment-api:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.comment-api == 'true'
+    runs-on: ubuntu-latest
+    environment: Prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with: 
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/Services/comment_service/Dockerfile
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/comment-api:latest
+
+  build-file-api:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.file-api == 'true'
+    runs-on: ubuntu-latest
+    environment: Prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/Services/FileService/Dockerfile
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/file-api:latest
+
+  build-api-gateway:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.api-gateway == 'true'
+    runs-on: ubuntu-latest
+    environment: Prod
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./src/ApiGateway/Gatewat.API/Dockerfile
+          push: true
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/api-gateway:latest
