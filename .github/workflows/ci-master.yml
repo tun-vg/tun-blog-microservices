@@ -1,0 +1,96 @@
+name: CI - Main workflow
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  detect-changes:
+    name: Detect Changed Files
+    runs-on: ubuntu-latest
+    outputs:
+      # Services
+      post-api: ${{ steps.filter.outputs.post-api }}
+      user-api: ${{ steps.filter.outputs.user-api }}
+      notification-api: ${{ steps.filter.outputs.notification-api }}
+      comment-api: ${{ steps.filter.outputs.comment-api }}
+      file-api: ${{ steps.filter.outputs.file-api }}
+      api-gateway: ${{ steps.filter.outputs.api-gateway }}
+      # Apps
+      app-blog: ${{ steps.filter.outputs.app-blog }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            post-api:
+              - 'src/Services/post_service/**'
+            user-api:
+              - 'src/Services/UserService/**'
+            notification-api:
+              - 'src/Services/notification-service/**'
+            comment-api:
+              - 'src/Services/comment_service/**'
+            file-api:
+              - 'src/Services/FileService/**'
+            api-gateway:
+              - 'src/ApiGateway/Gateway.API/**'
+            app-blog:
+              - 'src/Apps/App.Blog/**'
+
+  build-services:
+    name: Build .NET Services
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.post-api == 'true' ||
+      needs.detect-changes.outputs.user-api == 'true' ||
+      needs.detect-changes.outputs.notification-api == 'true' ||
+      needs.detect-changes.outputs.comment-api == 'true' ||
+      needs.detect-changes.outputs.file-api == 'true' ||
+      needs.detect-changes.outputs.api-gateway == 'true'
+    uses: ./.github/workflows/build-services.yml
+    with:
+      build-post-api: ${{ needs.detect-changes.outputs.post-api == 'true' }}
+      build-user-api: ${{ needs.detect-changes.outputs.user-api == 'true' }}
+      build-notification-api: ${{ needs.detect-changes.outputs.notification-api == 'true' }}
+      build-comment-api: ${{ needs.detect-changes.outputs.comment-api == 'true' }}
+      build-file-api: ${{ needs.detect-changes.outputs.file-api == 'true' }}
+      build-api-gateway: ${{ needs.detect-changes.outputs.api-gateway == 'true' }}
+
+  build-react-app:
+    name: Build React App
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.app-blog == 'true'
+    uses: ./.github/workflows/build-react-app.yml
+    with:
+      build-app: ${{ needs.detect-changes.outputs.app-blog == 'true' }}
+
+  summary:
+    name: Build Summary
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build-services, build-react-app]
+    if: '!cancelled()'
+    steps:
+      - name: Print build summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changes Detected:" >> $GITHUB_STEP_SUMMARY
+          echo "- Post: ${{ needs.detect-changes.outputs.post-api }}" >> $GITHUB_STEP_SUMMARY
+          echo "- User: ${{ needs.detect-changes.outputs.user-api }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Notification: ${{ needs.detect-changes.outputs.notification-api }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Comment: ${{ needs.detect-changes.outputs.comment-api }}" >> $GITHUB_STEP_SUMMARY
+          echo "- File: ${{ needs.detect-changes.outputs.file-api }}" >> $GITHUB_STEP_SUMMARY
+          echo "- API Gateway: ${{ needs.detect-changes.outputs.api-gateway }}" >> $GITHUB_STEP_SUMMARY
+          echo "- App.Blog: ${{ needs.detect-changes.outputs.app-blog }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Build Status:" >> $GITHUB_STEP_SUMMARY
+          echo "- Services Build: ${{ needs.build-services.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- React Apps Build: ${{ needs.build-react-app.result || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
