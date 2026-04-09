@@ -1,0 +1,41 @@
+name: Build React App
+
+on:
+  workflow_call: 
+    inputs:
+      build-app:
+        required: true
+        type: boolean
+env:
+  NODE_VERSION: 22.x
+jobs:
+  build-app:
+    name: Build App
+    if: inputs.build-app == true
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/Apps/App.Blog
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Use Node.js ${{ env.NODE_VERSION }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: src/Apps/App.Blog
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build app
+      run: npm run build --if-present
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-blog-build
+        path: src/Apps/App.Blog/dist
+        retention-days: 7
