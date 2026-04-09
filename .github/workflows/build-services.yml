@@ -1,15 +1,35 @@
 name: CI Build .NET Services
 
 on:
-  pull_request:
-    branches: [ "master" ]
+  workflow_call:
+    inputs:
+      build-post-api:
+        required: true
+        type: boolean
+      build-user-api:
+        required: true
+        type: boolean
+      build-notification-api:
+        required: true
+        type: boolean
+      build-comment-api:
+        required: true
+        type: boolean
+      build-file-api:
+        required: true
+        type: boolean
+      build-api-gateway:
+        required: true
+        type: boolean
+      
 env:
   DOTNET_VERSION: '8.0.x'
 
 jobs:
   build-post-api:
+    name: Build Post API
+    if: inputs.build-post-api == true
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -26,8 +46,9 @@ jobs:
         run: dotnet build src/Services/post_service/Post.API/Post.API.csproj --configuration Release --no-restore
 
   build-user-api:
+    name: Build User API
+    if: inputs.build-user-api == true
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -44,8 +65,9 @@ jobs:
         run: dotnet build src/Services/UserService/UserService.csproj --configuration Release --no-restore
 
   build-notification-api:
+    name: Build Notification API
+    if: inputs.build-notification-api == true
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -62,8 +84,9 @@ jobs:
         run: dotnet build src/Services/notification-service/NotificationService.csproj --configuration Release --no-restore
 
   build-commnet-api:
+    name: Build Comment API
+    if: inputs.build-comment-api == true
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -80,8 +103,9 @@ jobs:
         run: dotnet build src/Services/comment-service/comment-service.csproj --configuration Release --no-restore
 
   build-file-api:
+    name: Build File API
+    if: inputs.build-file-api == true
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -98,8 +122,9 @@ jobs:
         run: dotnet build src/Services/FileService/FileService.csproj --configuration Release --no-restore
 
   build-api-gateway:
+    name: Build API Gateway
+    if: inputs.build-api-gateway == true
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
