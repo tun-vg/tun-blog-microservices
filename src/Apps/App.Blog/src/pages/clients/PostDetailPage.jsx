@@ -17,7 +17,7 @@ import useTrackPostView from "../../utils/useTrackPostView";
 import { CiLink } from "react-icons/ci";
 import { FaFacebook, FaRegEye } from "react-icons/fa";
 import { getUserInfoById } from "../../api/user/user";
-import useAuthGuard from "../../hooks/useAuthGuard";
+import useAuthGuard from "../../utils/useAuthGuard";
 
 const PostDetailPage = () => {
     const { postId, slug } = useParams();
@@ -422,7 +422,7 @@ const PostDetailPage = () => {
 
                             <div className="flex gap-1 items-center bg-gray-200 rounded-3xl py-2 px-3">
                                 <GoComment />
-                                <div>30</div>
+                                <div>0</div>
                             </div>
 
                             <div className="flex gap-1 items-center bg-gray-200 rounded-3xl py-2 px-3">

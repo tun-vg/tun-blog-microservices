@@ -19,7 +19,11 @@ public class PostDto
 
     public Guid AuthorId { get; set; }
 
-    public string? AuthorName { get; set; }
+    public string? AuthorFirstName { get; set; }
+    
+    public string? AuthorLastName { get; set; }
+    
+    public string? AuthorAvatar { get; set; }
 
     public Guid CategoryId { get; set; }
     
@@ -28,6 +32,8 @@ public class PostDto
     public int Approved { get; set; }
 
     public int ViewCount { get; set; }
+    
+    public int CommentCount { get; set; }
 
     public int Point { get; set; }
 

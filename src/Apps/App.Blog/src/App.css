@@ -12,6 +12,33 @@
   padding-bottom: 2rem;
 }
 
+@media screen and (max-width: 1024px) {
+  .container-app {
+    padding-left: 10%;
+    padding-right: 10%;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .container-app {
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+@media screen and (max-width: 480pxpx) {
+  .container-app {
+    padding-left: 5%;
+    padding-right: 5%;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
 .ProseMirror {
   min-height: 240px;       /* khung tối thiểu */
   outline: none;           /* bỏ viền xanh khi focus */
@@ -53,4 +80,8 @@
   width: 20px;
   height: 1px;
   background-color: #d1d5db;
+}
+
+body {
+  font-family: Noto Sans,sans-serif;
 }

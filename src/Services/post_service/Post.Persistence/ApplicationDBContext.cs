@@ -34,4 +34,6 @@ public class ApplicationDBContext : DbContext
     public DbSet<PostVote> PostVotes { get; set; }
     
     public DbSet<PostBookMark> PostBookMarks { get; set; }
+    
+    public DbSet<PostAuthor> PostAuthors { get; set; }
 }

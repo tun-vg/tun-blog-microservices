@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FileService.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("[controller]")]
 public class FileController : ControllerBase
 {
     private readonly IFileService _fileService;
@@ -15,7 +15,7 @@ public class FileController : ControllerBase
     }
 
     [HttpPost("upload")]
-    public async Task<IActionResult> Upload([FromForm] IFormFile file, [FromQuery] string folder = "default")
+    public async Task<IActionResult> Upload(IFormFile file, [FromQuery] string folder = "default")
     {
         if (file == null || file.Length == 0)
             return BadRequest("File is missing.");

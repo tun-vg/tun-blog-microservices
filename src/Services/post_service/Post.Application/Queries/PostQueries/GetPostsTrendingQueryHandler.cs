@@ -26,7 +26,7 @@ namespace Post.Application.Queries.PostQueries
 
         public async Task<PagedResult<PostDto>> Handle(GetPostsTrendingQuery request, CancellationToken cancellationToken)
         {
-            var posts = await _postRepository.GetPostsTrending(request.Month, request.Year, request.Size);
+            var posts = await _postRepository.GetTrendingPostsWithTime(request.Month, request.Year, request.Size);
             var postDtos = _mapper.Map<List<PostDto>>(posts);
             return PagedResult<PostDto>.Create(postDtos, request.Size);
         }

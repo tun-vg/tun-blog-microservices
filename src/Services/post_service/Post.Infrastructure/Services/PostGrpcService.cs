@@ -42,7 +42,7 @@ public class PostGrpcService : PostService.PostServiceBase
 
     public override async Task<GetHostPostWeeklyResponse> GetHostPostWeekly(GetHostPostWeeklyRequest request, ServerCallContext context)
     {
-        var trendingPosts = await _postRepository.GetTrendingPosts();
+        var trendingPosts = await _postRepository.GetTrendingPosts(5);
         var posts = new List<Protos.Post>();
         foreach (var post in trendingPosts)
         {

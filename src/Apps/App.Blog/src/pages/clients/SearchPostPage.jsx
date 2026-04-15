@@ -5,8 +5,7 @@ import { searchPost } from "../../api/post/post";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { FaRegUser } from "react-icons/fa";
 import { FiTag } from "react-icons/fi";
-import { BsCaretUp } from "react-icons/bs";
-import { FaRegEye } from "react-icons/fa";
+import PostListCard from "../../components/ui/PostListCard";
 
 const SearchPostPage = () => {
     const [searchParams] = useSearchParams();
@@ -24,8 +23,7 @@ const SearchPostPage = () => {
 
     useEffect(() => {
         search();
-        console.log(data);
-    }, [type, searchValue])
+    }, [type, searchValue]);
 
     return (
         <>
@@ -84,41 +82,7 @@ const SearchPostPage = () => {
                     <hr />
                     <div className="h-fit">
                         {data !== null && type !== "user" && data.map((p) => {
-                            return <div key={p.postId}
-                                className='flex gap-x-4 mt-2 mb-2 bg-gray-300'
-                                onClick={() => navigate(`/post/${p.postId}/${p.slug}`)}>
-                                <img src='https://lh7-rt.googleusercontent.com/docsz/AD_4nXcvDH5qqP55rOehebEQChMCroH0U6PAvG55-o-eRHARHz1CifVLkoziLUDwE326CSAB4ch6sGHOu2W8BaiInFCfijcCTVCkt6M-LdQ0FnlOAU755T05ZqoIQLAkCPH2E8Glhg3Qnw?key=E_klvQY5pnbczCrBuwbNLg' alt='image' className='h-36 w-52' />
-                                <div className='flex flex-col gap-y-1 w-full justify-between'>
-                                    <div className=' flex justify-between items-center'>
-                                        <div className='flex gap-x-2 items-center'>
-                                            <p className='font-light'>{p.category} Thể thao</p>
-                                            <div className='bg-gray-400 h-1 w-1 rounded-sm'></div>
-                                            <p className='text-gray-400'>{p.readingTime} phút đọc</p>
-                                        </div>
-
-                                    </div>
-                                    <h2 className='font-semibold text-lg'>{p.title}</h2>
-                                    <p className='font-light'>{p.content}</p>
-                                    <div className="flex justify-between">
-                                        <div className='flex gap-x-2 items-center'>
-                                            <img src='https://lh7-rt.googleusercontent.com/docsz/AD_4nXcvDH5qqP55rOehebEQChMCroH0U6PAvG55-o-eRHARHz1CifVLkoziLUDwE326CSAB4ch6sGHOu2W8BaiInFCfijcCTVCkt6M-LdQ0FnlOAU755T05ZqoIQLAkCPH2E8Glhg3Qnw?key=E_klvQY5pnbczCrBuwbNLg' alt='avatar' className='h-7 w-7 rounded-2xl' />
-                                            <h3 className='font-semibold'>{p.author}</h3>
-                                            <div className='bg-gray-400 h-1 w-1 rounded-sm'></div>
-                                            <div className='text-gray-400'>Hôm qua</div>
-                                        </div>
-                                        <div className="flex gap-6">
-                                            <span className="flex gap-1 items-center">
-                                                <BsCaretUp className="text-2xl" />
-                                                {p.upPoint}
-                                            </span>
-                                            <span className="flex gap-1 items-center">
-                                                <FaRegEye className="text-xl pt-[1px]" />
-                                                {p.viewCount}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            return <PostListCard key={p.postId} post={p} showAction={true} />
                         })}
 
                         {data !== null && type === "user" && (

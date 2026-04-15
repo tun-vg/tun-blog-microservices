@@ -178,13 +178,9 @@ public class PostRepository : IPostRepository
         return posts;
     }
 
-    public async Task<List<Post.Domain.Entities.Post>> GetPostsTrending(int month, int year, int size)
+    public async Task<List<Post.Domain.Entities.Post>> GetTrendingPostsWithTime(int month, int year, int size)
     {
-        var posts = await _context.Posts
-            .AsNoTracking()
-            .Include(c => c.Category)
-            .Take(size)
-            .ToListAsync();
+        var posts = await GetTrendingPosts(size);
         return posts;
     }
 
@@ -250,13 +246,42 @@ public class PostRepository : IPostRepository
         }
     }
 
-    public async Task<List<Post.Domain.Entities.Post>> GetTrendingPosts()
+    public async Task<List<Post.Domain.Entities.Post>> GetTrendingPosts(int size)
     {
-        const int TARGET_COUNT = 5;
+        int TARGET_COUNT = size;
         var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
-        
-        var trendingPosts = await _context.Posts
+
+        var query = _context.Posts
             .AsNoTracking()
+            .Include(c => c.Category)
+            .Join(
+                _context.PostAuthors,
+                post => post.AuthorId,
+                author => author.AuthorId,
+                (post, author) => new Post.Domain.Entities.Post()
+                {
+                    PostId = post.PostId,
+                    Title = post.Title,
+                    Slug = post.Slug,
+                    Content = post.Content,
+                    AuthorId = post.AuthorId,
+                    CategoryId = post.CategoryId,
+                    Approved = post.Approved,
+                    Point = post.Point,
+                    UpPoint = post.UpPoint,
+                    DownPoint = post.DownPoint,
+                    ViewCount = post.ViewCount,
+                    ReadingTime = post.ReadingTime,
+                    Status = post.Status,
+                    CreatedAt = post.CreatedAt,
+                    UpdatedAt = post.UpdatedAt,
+                    CommentCount = post.CommentCount,
+                    Author = author,
+                    Category = post.Category
+                }
+            ).AsQueryable();
+        
+        var trendingPosts = await query
             .Where(p => p.CreatedAt >= oneWeekAgo)
             .OrderByDescending(p => (p.UpPoint - p.DownPoint) * 10 + p.ViewCount)
             .Take(TARGET_COUNT)
@@ -266,8 +291,7 @@ public class PostRepository : IPostRepository
         {
             var missingCount = TARGET_COUNT - trendingPosts.Count;
 
-            var olderPosts = await _context.Posts
-                .AsNoTracking()
+            var olderPosts = await query
                 .Where(p => p.CreatedAt < oneWeekAgo)
                 .OrderByDescending(p => (p.UpPoint - p.DownPoint) * 10 + p.ViewCount)
                 .Take(missingCount)
@@ -277,6 +301,43 @@ public class PostRepository : IPostRepository
         }
 
         return trendingPosts;
+    }
+
+    public async Task<List<Post.Domain.Entities.Post>> GetTopPosts(int size)
+    {
+        var topPosts = await _context.Posts
+            .AsNoTracking()
+            .Include(c => c.Category)
+            .Join(
+                _context.PostAuthors,
+                post => post.AuthorId,
+                author => author.AuthorId,
+                (post, author) => new Post.Domain.Entities.Post()
+                {
+                    PostId = post.PostId,
+                    Title = post.Title,
+                    Slug = post.Slug,
+                    Content = post.Content,
+                    AuthorId = post.AuthorId,
+                    CategoryId = post.CategoryId,
+                    Approved = post.Approved,
+                    Point = post.Point,
+                    UpPoint = post.UpPoint,
+                    DownPoint = post.DownPoint,
+                    ViewCount = post.ViewCount,
+                    ReadingTime = post.ReadingTime,
+                    Status = post.Status,
+                    CreatedAt = post.CreatedAt,
+                    UpdatedAt = post.UpdatedAt,
+                    CommentCount = post.CommentCount,
+                    Author = author,
+                    Category = post.Category
+                }
+            )
+            .OrderByDescending(p => (p.UpPoint - p.DownPoint) * 10 + p.ViewCount)
+            .Take(size)
+            .ToListAsync();
+        return topPosts;
     }
 
     public async Task ViewPost(Guid postId)

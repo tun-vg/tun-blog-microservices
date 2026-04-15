@@ -2,7 +2,7 @@ import { useKeycloak } from "@react-keycloak/web";
 import { TbWorld } from "react-icons/tb";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdownMenu";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CiBellOn, CiBookmark, CiPen, CiPenpot, CiSearch } from "react-icons/ci";
 import logo from "../../assets/images/logo1.png";
 import userImg from "../../assets/images/user.jpg";
@@ -11,17 +11,15 @@ import { RiDashboardFill, RiQuillPenLine } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
 import Notification from "../widgets/Notification";
 import { useForm } from "react-hook-form";
+import { getUserInfoById } from "../../api/user/user";
 
 const Header = () => {
-    const { keycloak } = useKeycloak();
+    const { keycloak, initialized } = useKeycloak();
     const { register, getValues, reset } = useForm({
         defaultValues: {search: ""}
     });
     const navigate = useNavigate();
-
-    const handleRedirectAdminPage = () => {
-        navigate('/app');
-    }
+    const [userInfo, setUserInfo] = useState(null);
 
 
     const [isOpenSearch, setIsOpenSearch] = useState(false);
@@ -34,6 +32,25 @@ const Header = () => {
             navigate(`/search?search_query=${searchValue}&type=post&page=1`);
         }
     }
+
+    const fetchUserInfo = async (userId) => {
+        try {
+            const response = await getUserInfoById(userId);
+            setUserInfo(response);
+        }
+        catch (error) {
+            console.log("Fetch user info error", error);
+        }
+    }
+
+    useEffect(() => {
+        if (initialized && keycloak.authenticated) {
+            fetchUserInfo(keycloak?.tokenParsed?.sub);
+        }
+        if (initialized && !keycloak.authenticated) {
+            setUserInfo(null);
+        }
+    }, [initialized, keycloak]);
 
     return (
         <>
@@ -114,7 +131,12 @@ const Header = () => {
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="p-0 flex items-center justify-center rounded-full ml-2">
                                             <div className="select-none">
-                                                <img src={userImg} alt="user_image" className="w-10 h-10 rounded-full" />
+                                                <img src={`
+                                                    ${!userInfo?.avatarUrl ? '/user.webp' : userInfo.avatarUrl}
+                                                `}
+                                                    alt="user_image"
+                                                    className="w-10 h-10 rounded-full"
+                                                />
                                             </div>
                                         </Button>
                                     </DropdownMenuTrigger>
@@ -130,34 +152,42 @@ const Header = () => {
                                             </div>
 
                                             <div className="m-1">
-                                                <DropdownMenuItem
-                                                    onClick={() => navigate(`/user-profile/${keycloak?.tokenParsed?.preferred_username}?tab=createdPosts`)}
-                                                    className="border-[1px] border-gray-500 rounded-3xl"
+                                                <Link
+                                                    to={`/user-profile/${keycloak?.tokenParsed?.preferred_username}?tab=createdPosts`}
                                                 >
-                                                    Xem trang cá nhân
-                                                </DropdownMenuItem>
+                                                    <DropdownMenuItem className="h-full border-[1px] border-gray-500 rounded-3xl">
+
+                                                        Xem trang cá nhân
+
+                                                    </DropdownMenuItem>
+                                                </Link>
                                             </div>
                                         </div>
                                         <hr />
-                                        <DropdownMenuItem
-                                            onClick={handleRedirectAdminPage}
+                                        <Link
+                                            to={`/app`}
                                         >
-                                            <div className="flex items-center gap-1">
-                                                <RiDashboardFill className="h-5 w-5 text-gray-500" />
-                                                Trang quản lý
-                                            </div>
-                                        </DropdownMenuItem>
+                                            <DropdownMenuItem>
+                                                <div className="flex items-center gap-1">
+                                                    <RiDashboardFill className="h-5 w-5 text-gray-500" />
+                                                    Trang quản lý
+                                                </div>
+                                            </DropdownMenuItem>
+                                        </Link>
 
-                                        <DropdownMenuItem
-                                            onClick={() => console.log()}
+                                        <Link
+                                            to={`/user-profile/${keycloak?.tokenParsed?.preferred_username}?tab=savedPosts`}
                                         >
-                                            <div
-                                                className="flex items-center gap-1"
-                                            >
-                                                <CiBookmark className='h-5 w-5 text-gray-500' />
-                                                Đã lưu
-                                            </div>
-                                        </DropdownMenuItem>
+                                            <DropdownMenuItem>
+                                                <div
+                                                    className="flex items-center gap-1"
+                                                >
+                                                    <CiBookmark className='h-5 w-5 text-gray-500' />
+                                                    Đã lưu
+                                                </div>
+                                            </DropdownMenuItem>
+                                        </Link>
+
                                         <hr />
                                         <DropdownMenuItem onClick={() => keycloak.logout()}>Đăng xuất</DropdownMenuItem>
                                     </DropdownMenuContent>

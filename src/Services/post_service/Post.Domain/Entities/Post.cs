@@ -35,6 +35,8 @@ public class Post : BaseEntity
     public int DownPoint { get; set; }
 
     public int ViewCount { get; set; }
+    
+    public int CommentCount { get; set; }
 
     public double ReadingTime { get; set; }
 
@@ -43,6 +45,8 @@ public class Post : BaseEntity
     public ICollection<PostTag> PostTags { get; set; } = new List<PostTag>();
     
     public ICollection<PostVote> PostVotes { get; set; } = new List<PostVote>();
+    
+    public PostAuthor? Author { get; set; }
     
     public Post() { }
 

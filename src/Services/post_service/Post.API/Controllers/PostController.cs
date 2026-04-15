@@ -75,9 +75,19 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("get-posts-trending")]
-    public async Task<IActionResult> GetTopPosts([FromQuery] int month, [FromQuery] int year, [FromQuery] int size)
+    public async Task<IActionResult> GetTrendingPosts([FromQuery] int month, [FromQuery] int year, [FromQuery] int size)
     {
         var result = await _mediator.Send(new GetPostsTrendingQuery(month, year, size));
+        return Ok(result);
+    }
+
+    [HttpGet("get-top-posts")]
+    public async Task<IActionResult> GetTopPosts([FromQuery] int size)
+    {
+        var result = await _mediator.Send(new GetTopPostsQuery()
+        {
+            Size = size
+        });
         return Ok(result);
     }
 

@@ -5,6 +5,11 @@ export const getPostsTrending = () => {
     return API.get(url);
 }
 
+export const getTopPosts = (size) => {
+    const url = `/post-api/post/get-top-posts?size=${size}`;
+    return API.get(url);
+}
+
 export const getFeaturedPosts = () => {
     const url = `/post-api/post/get-posts?page=1&pageSize=4`;
     return API.get(url);

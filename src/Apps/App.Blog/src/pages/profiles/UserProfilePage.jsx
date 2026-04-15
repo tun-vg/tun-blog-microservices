@@ -10,6 +10,8 @@ import BackToTopButton from "../../components/common/Button/BackToTopButton";
 import { useKeycloak } from "@react-keycloak/web";
 import Popup from "../../components/ui/Popup";
 import { GoBookmark } from "react-icons/go";
+import useAuthGuard from "../../utils/useAuthGuard";
+import PostListColCard from "../../components/ui/PostListColCard";
 
 const UserProfilePage = () => {
     const { username } = useParams();
@@ -17,21 +19,26 @@ const UserProfilePage = () => {
     const currentTab = searchParams.get('tab') || 'createdPosts';
     const { keycloak, initialized } = useKeycloak();
     const [data, setData] = useState([]);
-    const [userInfo, setUserInfo] = useState(null);
+    const [authorInfo, setAuthorInfo] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 15;
     const [hasNextPage, setHasNextPage] = useState(false);
     const [totalPosts, setTotalPosts] = useState(0);
     const [openPopupConfirmUnFollow, setOpenPopupConfirmUnFollow] = useState(false); 
+    const {requireLogin, getUserName} = useAuthGuard();
 
     useEffect(() => {
-        document.title = `Những bài viết của ${userInfo?.firstName} ${userInfo?.lastName}`;
-    }, [userInfo]);
+        document.title = `Những bài viết của ${authorInfo?.firstName} ${authorInfo?.lastName}`;
+    }, [authorInfo]);
 
-    const getUserInfo = async () => {
+    const getAuthorInfo = async () => {
         const response = await getUserInfoKeyCloakByUserName(username);
-        setUserInfo(response);
+        setAuthorInfo(response);
     }
+
+    useEffect(() => {
+        getAuthorInfo();
+    }, [username]);
 
     const getData = async (userId) => {
         const response = await getPostsByUserId(currentPage, pageSize, userId);
@@ -45,69 +52,64 @@ const UserProfilePage = () => {
     }
 
     const getBookMarkPosts = async () => {
-        const response = await getBookMarkPostByUserId(1, 10, userInfo?.userId);
+        const response = await getBookMarkPostByUserId(1, 10, authorInfo?.userId);
         setData(response.items);
     }
 
     useEffect(() => {
-        if (currentTab === 'savedPosts') {
+        if (currentTab === 'createdPosts') {
+            getData(authorInfo?.userId);
+        }
+        else if (currentTab === 'savedPosts') {
             getBookMarkPosts();
         }
-    }, [currentTab])
+    }, [currentTab, authorInfo]);
 
-    useEffect(() => {
-        getUserInfo();
-    }, [username])
-
-    useEffect(() => {
-        if (userInfo?.userId) {
-            getData(userInfo?.userId);
-        }
-    }, [userInfo])
-
-    const options = [
-        {
-            label: "Chế độ xem lưới",
-            value: "1",
-            isSelect: true
-        },
-        {
-            label: "Chế độ xem từng bài",
-            value: "2",
-            isSelect: false
-        },
-    ];
+    // const options = [
+    //     {
+    //         label: "Chế độ xem lưới",
+    //         value: "1",
+    //         isSelect: true
+    //     },
+    //     {
+    //         label: "Chế độ xem từng bài",
+    //         value: "2",
+    //         isSelect: false
+    //     },
+    // ];
 
     const nextPage = async () => {
         let updatePage = currentPage + 1;
         setCurrentPage(updatePage);
-        const result = await getPostsByUserId(updatePage, pageSize, userInfo.userId);
+        const result = await getPostsByUserId(updatePage, pageSize, authorInfo.userId);
         let dataArr = [...data, ...result.items];
         setData(dataArr);
         setHasNextPage(result.hasNextPage);
     }
 
     const followUser = async () => {
+        if (!requireLogin()) return;
+
         const obj = {
             followerId: keycloak?.tokenParsed?.sub,
-            followingId: userInfo?.userId
+            followingId: authorInfo?.userId
         }
         await followUserAPI(obj);
-        await getUserInfo();
+        await getauthorInfo();
     }
 
     const unFollowUser = async () => {
         const obj = {
             followerId: keycloak?.tokenParsed?.sub,
-            followingId: userInfo?.userId
+            followingId: authorInfo?.userId
         }
         await unFollowUserAPI(obj);
-        await getUserInfo();
+        await getauthorInfo();
         setOpenPopupConfirmUnFollow(false);
     }
 
     const checkFollowed = (userId) => {
-        const isFollowed = userInfo?.follows.some(f => f.followerId == userId);
+        const isFollowed = authorInfo?.follows.some(f => f.followerId == userId);
 
         return isFollowed;
     }
@@ -116,26 +118,30 @@ const UserProfilePage = () => {
         <>
             <div className="container-app flex gap-5">
                 <div className="bg-gray-200 rounded-md w-3/12 flex flex-col items-center gap-2 py-3">
-                    <img src='https://lh7-rt.googleusercontent.com/docsz/AD_4nXcvDH5qqP55rOehebEQChMCroH0U6PAvG55-o-eRHARHz1CifVLkoziLUDwE326CSAB4ch6sGHOu2W8BaiInFCfijcCTVCkt6M-LdQ0FnlOAU755T05ZqoIQLAkCPH2E8Glhg3Qnw?key=E_klvQY5pnbczCrBuwbNLg' alt='image' className='h-36 w-36 rounded-full' />
+                    <img src={`${authorInfo?.avatarUrl}`} alt='image' className='h-36 w-36 rounded-full object-cover' />
                     <div>
-                        <div className="font-bold text-lg">{userInfo?.firstName} {userInfo?.lastName}</div>
-                        <div className="text-gray-500 text-base">@{userInfo?.userName}</div>
+                        <div className="font-bold text-lg">{authorInfo?.firstName} {authorInfo?.lastName}</div>
+                        <div className="text-gray-500 text-base">@{authorInfo?.userName}</div>
                     </div>
-                    {checkFollowed(keycloak?.tokenParsed?.sub) ? (
-                        <button
-                            className="bg-blue-200 px-5 py-2 text-blue-500 rounded-md"
-                            onClick={() => setOpenPopupConfirmUnFollow(true)}
-                        >
-                            Đang theo dõi
-                        </button>
-                    ) : (
-                        <button
-                            className="bg-blue-200 px-5 py-2 text-blue-500 rounded-md"
-                            onClick={() => followUser()}
-                        >
-                            Theo dõi
-                        </button>
+
+                    {authorInfo?.userName !== getUserName() && (
+                        checkFollowed(keycloak?.tokenParsed?.sub) ? (
+                            <button
+                                className="bg-blue-200 px-5 py-2 text-blue-500 rounded-md"
+                                onClick={() => setOpenPopupConfirmUnFollow(true)}
+                            >
+                                Đang theo dõi
+                            </button>
+                        ) : (
+                            <button
+                                className="bg-blue-200 px-5 py-2 text-blue-500 rounded-md"
+                                onClick={() => followUser()}
+                            >
+                                Theo dõi
+                            </button>
+                        )
                     )}
+
                     <div>
                         <Popup 
                             isOpen={openPopupConfirmUnFollow} 
@@ -162,17 +168,17 @@ const UserProfilePage = () => {
                     
                     <div className="flex flex-wrap gap-7 max-w-full p-2">
                         <div>
-                            {userInfo?.followersCount} <br /> followers
+                            {authorInfo?.followersCount} <br /> followers
                         </div>
                         <div>
-                            {userInfo?.followingCount} <br /> following
+                            {authorInfo?.followingCount} <br /> following
                         </div>
                         <div>
                             {totalPosts} <br /> posts
                         </div>
                     </div>
                 </div>
-                <div className="bg-gray-100 w-9/12 rounded-md">
+                <div className="bg-gray-50 w-9/12 rounded-md">
                     <div className="flex justify-between">
                         <div className="flex gap-8 px-4">
                             <div>
@@ -195,16 +201,18 @@ const UserProfilePage = () => {
                                 </button>
                                 {currentTab === 'series' && <div className="h-[2px] w-full bg-blue-500"></div>}
                             </div>
-                            <div>
-                                <button
-                                    className="flex gap-1 items-center px-3 py-2 rounded-sm hover:bg-blue-200"
-                                    onClick={() => handleTabChange('savedPosts')}
-                                >
-                                    <GoBookmark />
-                                    Đã lưu
-                                </button>
-                                {currentTab === 'savedPosts' && <div className="h-[2px] w-full bg-blue-500"></div>}
-                            </div>
+                            {authorInfo?.userName === getUserName() &&
+                                <div>
+                                    <button
+                                        className="flex gap-1 items-center px-3 py-2 rounded-sm hover:bg-blue-200"
+                                        onClick={() => handleTabChange('savedPosts')}
+                                    >
+                                        <GoBookmark />
+                                        Đã lưu
+                                    </button>
+                                    {currentTab === 'savedPosts' && <div className="h-[2px] w-full bg-blue-500"></div>}
+                                </div>
+                            }
                         </div>
                     </div>
                     <hr />
@@ -217,7 +225,7 @@ const UserProfilePage = () => {
                                 isMulti={""}
                                 placeholder={dataFilter.label}
                             /> */}
-                            <select className="py-1 focus:outline-none bg-gray-100">
+                            <select className="py-1 focus:outline-none bg-gray-50">
                                 <option value="someOption">Theo thời gian</option>
                                 <option value="otherOption">Theo độ nổi bật</option>
                             </select>
@@ -233,32 +241,12 @@ const UserProfilePage = () => {
                                     Chế độ xem từng bài
                                 </li>
                             </ul> */}
-                            <CustomSelect options={options} />
+                            {/* <CustomSelect options={options} /> */}
                         </div>
                     </div>
                     <div className='grid grid-cols-3 gap-x-5 mt-2 items-stretch'>
                         {data?.map((p) => (
-                            <div key={p.postId} className='w-fit flex flex-col gap-y-3 bg-gray-100'>
-                                <img
-                                    src='/notebook.png'
-                                    alt='image'
-                                    className='h-auto w-56 rounded-lg object-cover'
-                                />
-                                <div className='flex justify-between items-center'>
-                                    <p className='text-gray-400'>{p.readingTime} phút đọc</p>
-                                    <CiBookmark className='h-5 w-5 text-gray-400' />
-                                </div>
-                                <div className="h-full w-full flex flex-col justify-between">
-                                    <p className="w-auto">{p.title}</p>
-                                    <div className='flex items-center justify-between gap-x-3'>
-                                        <div className='text-gray-400'>17 Th6</div>
-                                        <span className="grid grid-cols-2 place-items-center">
-                                            <BsEye />
-                                            {p.viewCount}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                            <PostListColCard key={p.postId} post={p} showAuthor={false}/>
                         ))}
 
                     </div>

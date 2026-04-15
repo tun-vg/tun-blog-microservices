@@ -5,6 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
+import { uploadFile } from "../../api/file/file";
 
 export default function Editor({ onChange }) {
   const fileInputRef = useRef(null);
@@ -31,12 +32,16 @@ export default function Editor({ onChange }) {
 
   // --- A) Upload thường ---
   const uploadFileToServer = async (file) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/files/upload", { method: "POST", body: formData });
-    if (!res.ok) throw new Error("Upload failed");
-    const data = await res.json();
-    return data.url; // backend trả về URL public
+    try {
+
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await uploadFile(formData);
+      return res.url; // backend trả về URL public
+    }
+    catch (error) {
+      throw new Error(error);
+    }
   };
 
   // --- B) Pre-signed URL (khuyên dùng) ---
@@ -59,8 +64,8 @@ export default function Editor({ onChange }) {
     if (!file) return;
     try {
       // Chọn 1 trong 2 cách:
-      // const url = await uploadFileToServer(file);
-      const url = await uploadFileByPresign(file);
+      const url = await uploadFileToServer(file);
+      // const url = await uploadFileByPresign(file);
 
       editor.chain().focus().setImage({ src: url, alt: file.name }).run();
     } catch (err) {

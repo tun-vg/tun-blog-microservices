@@ -27,6 +27,17 @@ builder.Services.AddGrpc();
 builder.Services.AddScoped<IFileService, FileService.Services.FileService>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigin",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 app.MapGrpcService<FileGrpcService>();
@@ -37,6 +48,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAllOrigin");
 
 app.MapGet("/", () => "This is gRPC FileService");
 

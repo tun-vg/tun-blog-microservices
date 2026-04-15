@@ -43,7 +43,7 @@ const privateRoutes = [
       {
         path: 'tag-management',
         element: <TagManagementPage />,
-        access: ['ADMIN']
+        // access: ['ADMIN']
       },
       {
         path: 'post-management',
@@ -53,7 +53,7 @@ const privateRoutes = [
       {
         path: 'category-management',
         element: <CategoryManagementPage />,
-        access: ['ADMIN']
+        // access: ['ADMIN']
       }
     ]
   },
