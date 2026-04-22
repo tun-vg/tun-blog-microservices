@@ -7,7 +7,7 @@ namespace Post.Domain.Entities;
 public class PostAuthor
 {
     [Key]
-    public Guid PostAuthorId { get; set; } = Guid.NewGuid();
+    public Guid PostAuthorId { get; set; } = Guid.Empty;
 
     public Guid AuthorId { get; set; } = Guid.Empty;
     

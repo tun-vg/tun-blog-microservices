@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { getBookMarkPostByUserId, getPostsByUserId, getPostsTrending } from "../../api/post/post";
-import { CiBookmark, CiGrid41 } from "react-icons/ci";
+import { CiBookmark, CiEdit, CiGrid41 } from "react-icons/ci";
 import { RiQuillPenLine } from "react-icons/ri";
 import { BsCollection, BsEye } from "react-icons/bs";
 import CustomSelect from "../../components/common/Select/CustomSelect";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { followUserAPI, getUserInfoKeyCloakByUserName, unFollowUserAPI } from "../../api/user/user";
 import BackToTopButton from "../../components/common/Button/BackToTopButton";
 import { useKeycloak } from "@react-keycloak/web";
@@ -120,7 +120,16 @@ const UserProfilePage = () => {
                 <div className="bg-gray-200 rounded-md w-3/12 flex flex-col items-center gap-2 py-3">
                     <img src={`${authorInfo?.avatarUrl}`} alt='image' className='h-36 w-36 rounded-full object-cover' />
                     <div>
-                        <div className="font-bold text-lg">{authorInfo?.firstName} {authorInfo?.lastName}</div>
+                        <div className="flex items-center gap-2">
+                            <div className="font-bold text-lg">
+                                {authorInfo?.firstName} {authorInfo?.lastName} 
+                            </div>
+                            <Link
+                                to={`/user-profile/settings`}
+                            >
+                                <CiEdit  className="mt-1 h-7 w-6 text-blue-400"/>
+                            </Link>
+                        </div>
                         <div className="text-gray-500 text-base">@{authorInfo?.userName}</div>
                     </div>
 

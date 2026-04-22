@@ -80,7 +80,7 @@ builder.Services.AddSingleton<RabbitMqConfig>(sp =>
 
     var rabbitMqExchange = new RabbitMqExchange()
     {
-        Content = builder.Configuration.GetValue<string>("RabbitMQ:Exchanges:Content"),
+        Post = builder.Configuration.GetValue<string>("RabbitMQ:Exchanges:Post"),
         Notification = builder.Configuration.GetValue<string>("RabbitMQ:Exchanges:Notification")
     };
 

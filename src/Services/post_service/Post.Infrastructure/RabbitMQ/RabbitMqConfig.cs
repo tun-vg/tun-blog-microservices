@@ -1,4 +1,4 @@
-﻿namespace NotificationService.RabbitMQ;
+namespace Post.Infrastructure.RabbitMQ;
 
 public class RabbitMqConfig
 {
@@ -20,7 +20,5 @@ public class RabbitMqConnection
 
 public class RabbitMqExchange
 {
-    public string Post { get; set; } = string.Empty;
-    
-    public string Notification { get; set; } = string.Empty;
+    public string User { get; set; } = string.Empty;
 }

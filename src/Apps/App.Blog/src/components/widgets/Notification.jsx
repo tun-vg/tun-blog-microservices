@@ -10,6 +10,7 @@ import { SlOptionsVertical } from "react-icons/sl";
 import { useNavigate } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
 import * as signalR from "@microsoft/signalr";
+import { use } from "react";
 
 const Notification = () => {
     const { keycloak, initialized } = useKeycloak();
@@ -113,6 +114,11 @@ const Notification = () => {
             return;
         }
 
+        if (initialized && !keycloak.authenticated) {
+            setDataListNotify([]);
+            setCountUnreadNotify(0);
+        }
+
         if (userId) {
             const connection = new signalR.HubConnectionBuilder()
                 .withUrl("http://localhost:5074/notificationHub", {
@@ -155,7 +161,11 @@ const Notification = () => {
                 <div onClick={() => { handleOpenNotify() }} className='h-12 flex items-center cursor-pointer'>
                     <CiBellOn className='w-6 h-6' />
                     {countUnreadNotify > 0 &&
-                        <div className='absolute ml-[10px] mt-[-18px] bg-red-500 rounded-full w-6 h-6 text-white text-center'>{countUnreadNotify}</div>
+                        <div 
+                            className='absolute ml-[10px] mt-[-18px] bg-red-500 rounded-full w-fit h-fit px-[2px] text-white text-center text-sm'
+                        >
+                            {countUnreadNotify}
+                        </div>
                     }
                 </div>
                 {openNotify && (
@@ -252,8 +262,6 @@ const Notification = () => {
                         </div>
                     </div>
                 )}
-
-
             </div>
         </div>
     </>

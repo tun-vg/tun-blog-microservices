@@ -40,6 +40,7 @@ builder.Services.AddScoped<IPostTagRepository, PostTagRepository>();
 builder.Services.AddScoped<IPostVoteRepository, PostVoteRepository>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddContract();
+builder.Services.AddScoped<IPostAuthorRepository, PostAuthorRepository>();
 
 // config AutoMapper
 builder.Services.AddAutoMapper(typeof(ProfileMapper));

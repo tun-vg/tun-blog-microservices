@@ -11,9 +11,9 @@ const TagManagementPage = lazy(
   () => import('../../pages/admins/tags/TagManagementPage')
 );
 
-// const UserProfilePage = lazy(
-//   () => import('../../pages/profiles/UserProfilePage')
-// );
+const UserProfileEditPage = lazy(
+  () => import('../../pages/profiles/UserProfileEditPage')
+);
 
 const CreatePostPage = lazy(
   () => import('../../pages/clients/CreatePostPage')
@@ -57,20 +57,20 @@ const privateRoutes = [
       }
     ]
   },
-  // {
-  //   path: 'user-profile',
-  //   element:
-  //     <Suspense fallback={<div>Loading...</div>}>
-  //       <MainLayout />
-  //     </Suspense>,
-  //   children: [
-  //     {
-  //       path: ':username',
-  //       element: <UserProfilePage />,
-  //       access: ['ADMIN', 'USER'],
-  //     }
-  //   ]
-  // },
+  {
+    path: 'user-profile',
+    element:
+      <Suspense fallback={<div>Loading...</div>}>
+        <MainLayout />
+      </Suspense>,
+    children: [
+      {
+        path: 'settings',
+        element: <UserProfileEditPage />,
+        // access: ['ADMIN', 'USER'],
+      }
+    ]
+  },
   {
     path: 'post',
     element:

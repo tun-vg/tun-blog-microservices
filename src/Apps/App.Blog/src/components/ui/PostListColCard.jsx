@@ -22,7 +22,12 @@ const PostListColCard = ({ post, showAuthor = true }) => {
                 <div className='flex items-center justify-between'>
                     {showAuthor ? (
                         <div className="flex items-center justify-center gap-x-2">
-                            <img src='https://lh7-rt.googleusercontent.com/docsz/AD_4nXcvDH5qqP55rOehebEQChMCroH0U6PAvG55-o-eRHARHz1CifVLkoziLUDwE326CSAB4ch6sGHOu2W8BaiInFCfijcCTVCkt6M-LdQ0FnlOAU755T05ZqoIQLAkCPH2E8Glhg3Qnw?key=E_klvQY5pnbczCrBuwbNLg' alt='avatar' className='h-7 w-7 rounded-2xl' />
+                            <img src={`
+                                    ${post.authorAvatar ? post.authorAvatar : '/user.webp'}
+                                `} 
+                                alt='avatar' 
+                                className='h-7 w-7 rounded-2xl object-cover' 
+                            />
                             <div className='h-1 w-1 bg-gray-400 rounded-md'></div>
                             <div className='text-gray-400'>{converteTimeToString(post.createdAt)}</div>
                         </div>
@@ -32,7 +37,7 @@ const PostListColCard = ({ post, showAuthor = true }) => {
                         </div>
                     )}
                     
-                    <span className="grid grid-cols-2 place-items-center">
+                    <span className="grid grid-cols-2 place-items-center gap-1">
                         <BsEye />
                         {post.viewCount}
                     </span>

@@ -15,6 +15,14 @@ public static class UserMappingExtensions
         userRepresentation.LastName = userDto.LastName;
         userRepresentation.Email = userDto.Email;
         
+        if (!string.IsNullOrEmpty(userDto.Description))
+        {
+            userRepresentation.Attributes = new Dictionary<string, ICollection<string>>
+            {
+                { "description", new List<string> { userDto.Description } }
+            };
+        }
+        
         return userRepresentation;
     }
 
@@ -31,6 +39,11 @@ public static class UserMappingExtensions
         userDto.FollowingCount = userProfileExtend.FollowingCount;
         userDto.AvatarUrl = userProfileExtend.AvatarUrl;
         userDto.Follows = follows ?? new List<UserFollowDto>();
+        
+        if (userRepresentation.Attributes != null && userRepresentation.Attributes.TryGetValue("description", out var descriptionValues))
+        {
+            userDto.Description = descriptionValues.FirstOrDefault();
+        }
         
         return userDto;
     }

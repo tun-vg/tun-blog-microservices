@@ -20,14 +20,22 @@ public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, Resul
     private readonly IPostRepository _postRepository;
     private readonly ITagRepository _tagRepository;
     private readonly IPostTagRepository _postTagRepository;
+    private readonly IPostAuthorRepository _postAuthorRepository;
     private readonly IFileGrpcClient _fileGrpcClient;
     private readonly IMapper _mapper;
 
-    public CreatePostCommandHandler(IPostRepository postRepository, ITagRepository tagRepository, IPostTagRepository postTagRepository, IFileGrpcClient fileGrpcClient, IMapper mapper)
+    public CreatePostCommandHandler(
+        IPostRepository postRepository, 
+        ITagRepository tagRepository, 
+        IPostTagRepository postTagRepository, 
+        IPostAuthorRepository postAuthorRepository,
+        IFileGrpcClient fileGrpcClient, 
+        IMapper mapper)
     {
         _postRepository = postRepository;
         _tagRepository = tagRepository;
         _postTagRepository = postTagRepository;
+        _postAuthorRepository = postAuthorRepository;
         _fileGrpcClient = fileGrpcClient;
         _mapper = mapper;
     }
@@ -67,6 +75,19 @@ public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, Resul
             }
         }
         await _postTagRepository.SavePostTag(postTags);
+
+        var postAuthor = new PostAuthor()
+        {
+            PostAuthorId = Guid.NewGuid(),
+            AuthorId = command.AuthorId,
+            Email = command.Email,
+            UserName = command.UserName,
+            FirstName = command.FirstName,
+            LastName = command.LastName,
+            AvatarUrl = command.AvatarUrl
+        };
+        
+        await _postAuthorRepository.CreatePostAuthor(postAuthor);
 
         PostDto postDto = _mapper.Map<PostDto>(post);
         postDto.ImageUrl = imageUrl;

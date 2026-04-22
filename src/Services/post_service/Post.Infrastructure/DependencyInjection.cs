@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Post.Contract.Provider;
 using Post.Contract.Services;
 using Post.Infrastructure.Grpc;
+using Post.Infrastructure.RabbitMQ;
+using Post.Infrastructure.RabbitMQ.Consumers;
 
 //using Post.Infrastructure.Provider;
 using Post.Infrastructure.Services;
@@ -47,6 +49,32 @@ public static class DependencyInjection
         services.AddScoped<IKeycloakService, KeycloakService>();
         services.AddKeycloakAdminHttpClient(configuration);
 
+        services.AddSingleton<RabbitMqConfig>(cfg =>
+        {
+            var rabbitMqConnection = new RabbitMqConnection()
+            {
+                HostName = configuration.GetValue<string>("RabbitMQ:Connection:HostName")!,
+                Port = configuration.GetValue<int>("RabbitMQ:Connection:Port"),
+                UserName = configuration.GetValue<string>("RabbitMQ:Connection:UserName")!,
+                Password = configuration.GetValue<string>("RabbitMQ:Connection:Password")!
+            };
+
+            var rabbitMqExchange = new RabbitMqExchange()
+            {
+                User = configuration.GetValue<string>("RabbitMQ:Exchanges:User")!
+            };
+            
+            var rabbitMqConfig = new RabbitMqConfig()
+            {
+                RabbitMqConnection = rabbitMqConnection,
+                RabbitMqExchange = rabbitMqExchange
+            };
+            
+            return rabbitMqConfig;
+        });
+        services.AddScoped<IPostAuthorService, PostAuthorService>();
+        services.AddHostedService<PostAuthorUpdateConsumer>();
+        
         return services;
     }
 }

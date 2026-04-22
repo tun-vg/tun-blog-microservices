@@ -3,7 +3,7 @@ import { TbWorld } from "react-icons/tb";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdownMenu";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { CiBellOn, CiBookmark, CiPen, CiPenpot, CiSearch } from "react-icons/ci";
+import { CiBellOn, CiBookmark, CiPen, CiPenpot, CiSearch, CiSettings } from "react-icons/ci";
 import logo from "../../assets/images/logo1.png";
 import userImg from "../../assets/images/user.jpg";
 import { useEffect, useState } from "react";
@@ -11,15 +11,15 @@ import { RiDashboardFill, RiQuillPenLine } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
 import Notification from "../widgets/Notification";
 import { useForm } from "react-hook-form";
-import { getUserInfoById } from "../../api/user/user";
+import { useUser } from "../../contexts/UserContext";
 
 const Header = () => {
     const { keycloak, initialized } = useKeycloak();
+    const { userInfo } = useUser();
     const { register, getValues, reset } = useForm({
         defaultValues: {search: ""}
     });
     const navigate = useNavigate();
-    const [userInfo, setUserInfo] = useState(null);
 
 
     const [isOpenSearch, setIsOpenSearch] = useState(false);
@@ -32,25 +32,6 @@ const Header = () => {
             navigate(`/search?search_query=${searchValue}&type=post&page=1`);
         }
     }
-
-    const fetchUserInfo = async (userId) => {
-        try {
-            const response = await getUserInfoById(userId);
-            setUserInfo(response);
-        }
-        catch (error) {
-            console.log("Fetch user info error", error);
-        }
-    }
-
-    useEffect(() => {
-        if (initialized && keycloak.authenticated) {
-            fetchUserInfo(keycloak?.tokenParsed?.sub);
-        }
-        if (initialized && !keycloak.authenticated) {
-            setUserInfo(null);
-        }
-    }, [initialized, keycloak]);
 
     return (
         <>
@@ -135,7 +116,7 @@ const Header = () => {
                                                     ${!userInfo?.avatarUrl ? '/user.webp' : userInfo.avatarUrl}
                                                 `}
                                                     alt="user_image"
-                                                    className="w-10 h-10 rounded-full"
+                                                    className="w-10 h-10 rounded-full object-cover"
                                                 />
                                             </div>
                                         </Button>
@@ -184,6 +165,17 @@ const Header = () => {
                                                 >
                                                     <CiBookmark className='h-5 w-5 text-gray-500' />
                                                     Đã lưu
+                                                </div>
+                                            </DropdownMenuItem>
+                                        </Link>
+
+                                        <Link
+                                            to={`/user-profile/settings`}
+                                        >
+                                            <DropdownMenuItem>
+                                                <div className="flex items-center gap-1">
+                                                    <CiSettings className='h-5 w-5 text-gray-500' />
+                                                    Tùy chỉnh tài khoản
                                                 </div>
                                             </DropdownMenuItem>
                                         </Link>

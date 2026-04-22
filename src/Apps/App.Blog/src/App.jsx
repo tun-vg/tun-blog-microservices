@@ -2,6 +2,7 @@ import { ReactKeycloakProvider } from '@react-keycloak/web';
 import './App.css';
 import keycloak from './keycloak';
 import AppRoutes from './navigation/routes/AppRoutes';
+import { UserProvider } from './contexts/UserContext';
 
 function App() {
   return (
@@ -16,7 +17,9 @@ function App() {
               storeTokens: true
           }}
       >
-          <AppRoutes />
+          <UserProvider>
+              <AppRoutes />
+          </UserProvider>
       </ReactKeycloakProvider>
     </>
   );

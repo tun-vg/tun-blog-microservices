@@ -9,21 +9,45 @@ import { ToastContainer, toast } from "react-toastify";
 import { FaPlus } from "react-icons/fa6";
 import { getCategories } from "../../api/category/category";
 import { getTagsByCategoryId } from "../../api/tag/tag";
+import useAuthGuard from "../../utils/useAuthGuard";
+import { getUserInfoById } from "../../api/user/user";
+import { set } from "date-fns";
 
 const CreatePostPage = () => {
     const [html, setHtml] = useState("<p>Nhập nội dung...</p>");
 
     const { handleSubmit, reset, control, register } = useForm();
 
-    const { keycloak } = useKeycloak();
+    const { keycloak, initialized } = useKeycloak();
+    const { requiredLogin } = useAuthGuard();
+    const [authorInfo, setAuthorInfo] = useState();
+
+    const fetchAuthorInfo = async (userId) => {
+        var response = await getUserInfoById(userId);
+        setAuthorInfo(response);
+    }
+
+    useEffect(() => {
+        if (initialized && keycloak.authenticated) {
+            fetchAuthorInfo(keycloak.tokenParsed.sub);
+        }
+    }, [initialized, keycloak]);
 
     const onSubmit = async (data) => {
+        if (!requiredLogin()){
+            return;
+        }
         data.Content = html;
         data.categoryId = selectedCategory.categoryId;
         data.postTags = dataTagsSelected;
-        console.log(data);
+        data.userName = authorInfo?.userName;
+        data.email = authorInfo?.email;
+        data.firstName = authorInfo?.firstName;
+        data.lastName = authorInfo?.lastName;
+        data.avatarUrl = authorInfo?.avatarUrl;
+        
         const result = await addPost(data);
-        console.log(result);
+        
         if (result.isSuccess) {
             toast("Add Post Successfully!");
         }

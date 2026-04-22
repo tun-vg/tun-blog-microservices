@@ -20,3 +20,8 @@ export const getUserInfoById = (userId) => {
     const url = `/user-api/user/${userId}`;
     return API.get(url);
 }
+
+export const updateUser = (data) => {
+    const url = `/user-api/user/update-user`;
+    return API.put(url, data);
+}

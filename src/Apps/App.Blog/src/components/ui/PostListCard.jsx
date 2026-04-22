@@ -34,7 +34,12 @@ const PostListCard = ({ post, showAction = true }) => {
             {showAction ? (
                 <div className="flex justify-between">
                     <div className='flex gap-x-2 items-center'>
-                        <img src={`${post.authorAvatar}`} alt='avatar' className='h-7 w-7 rounded-2xl object-cover' />
+                        <img src={`
+                                    ${post.authorAvatar ? post.authorAvatar : '/user.webp'}
+                                `}
+                            alt='avatar'
+                            className='h-7 w-7 rounded-2xl object-cover'
+                        />
                         <h3 className='font-semibold text-sm'>{post.authorFirstName} {post.authorLastName}</h3>
                         <div className='bg-gray-400 h-1 w-1 rounded-sm'></div>
                         <div className='text-gray-400'>{converteTimeToString(post.createdAt)}</div>
@@ -50,7 +55,7 @@ const PostListCard = ({ post, showAction = true }) => {
                         </span>
                         <span className="flex gap-1 items-center">
                             <GoComment className="text-xl pt-[1px]" />
-                            10
+                            {post.commentCount}
                         </span>
                     </div>
                 </div>

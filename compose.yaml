@@ -67,7 +67,7 @@ services:
     container_name: post-api
     restart: unless-stopped
     ports:
-      - ${POST_API_PORT):5270
+      - ${POST_API_PORT}:5270
       - ${POST_GRPC_PORT}:5271
     depends_on:
       - mysql 

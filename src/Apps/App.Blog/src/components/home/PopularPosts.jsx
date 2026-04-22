@@ -22,7 +22,7 @@ const PopularPosts = () => {
         <>
             <div>
                 <h1 className='font-bold text-lg'>PHỔ BIẾN TRÊN BLOG</h1>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div className='grid 2xl:grid-cols-2 lg:grid-cols-1 md:grid-cols-1 gap-4'>
                     {favPost?.map(p => {
                         return <PostListCard key={p.postId} post={p} showAction={false} />
                     })}

@@ -6,6 +6,8 @@ namespace UserService.Dtos;
 
 public class UserDto
 {
+    // Keycloak data
+    
     public string? UserId { get; set; }
     
     public string? UserName { get; set; }
@@ -16,7 +18,9 @@ public class UserDto
     
     public string? LastName { get; set; }
     
-    // user service data
+    public string? Description { get; set; }
+    
+    // User service data
     
     public int FollowersCount { get; set; }
     

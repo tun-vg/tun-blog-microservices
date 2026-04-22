@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using UserService;
 using UserService.Commons;
+using UserService.RabbitMQ;
 using UserService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -76,6 +77,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IUserFollowService, UserFollowService>();
+
+builder.Services.AddSingleton<RabbitMqConfig>(cfg =>
+{
+    var config = new RabbitMqConfig()
+    {
+        HostName = builder.Configuration.GetValue<string>("RabbitMQ:HostName"),
+        Port = builder.Configuration.GetValue<int>("RabbitMQ:Port"),
+        UserName = builder.Configuration.GetValue<string>("RabbitMQ:UserName"),
+        Password = builder.Configuration.GetValue<string>("RabbitMQ:Password"),
+        ExchangeName = builder.Configuration.GetValue<string>("RabbitMQ:ExchangeName")
+    };
+    return config;
+});
+builder.Services.AddScoped<IRabbitMqProducer, RabbitMqProducer>();
 
 builder.Services.AddAutoMapper(typeof(ProfileMapper));
 

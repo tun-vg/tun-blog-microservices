@@ -7,4 +7,6 @@ public interface IKeycloakUserService
     Task<UserDto> GetUserByUserNameAsync(string username);
     
     Task<UserDto> GetUserByIdAsync(string userId);
+    
+    Task<UserDto> UpdateUserAsync(UserDto user);
 }

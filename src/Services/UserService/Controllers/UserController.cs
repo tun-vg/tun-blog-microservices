@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UserService.Dtos;
 using UserService.Services;
 
 namespace UserService.Controllers;
@@ -41,6 +42,20 @@ public class UserController : ControllerBase
         catch (Exception e)
         {
             return NotFound(e.Message);
+        }
+    }
+
+    [HttpPut("update-user")]
+    public async Task<IActionResult> UpdateUser([FromBody] UserDto userDto)
+    {
+        try
+        {
+            var result = await _keycloakUserService.UpdateUserAsync(userDto);
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
         }
     }
 }

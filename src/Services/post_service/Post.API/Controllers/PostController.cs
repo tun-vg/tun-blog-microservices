@@ -48,8 +48,11 @@ public class PostController : ControllerBase
             AuthorId = dto.AuthorId,
             CategoryId = dto.CategoryId,
             PostTags = dto.PostTags,
-            ImageBytes = ms.ToArray(),
-            ImageFileName = dto.Image?.FileName
+            UserName = dto.UserName,
+            Email = dto.Email,
+            FirstName = dto.FirstName,
+            LastName = dto.LastName,
+            AvatarUrl = dto.AvatarUrl
         };
 
         var result = await _mediator.Send(command);
