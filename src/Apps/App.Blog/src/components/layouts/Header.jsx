@@ -12,6 +12,7 @@ import { IoMdClose } from "react-icons/io";
 import Notification from "../widgets/Notification";
 import { useForm } from "react-hook-form";
 import { useUser } from "../../contexts/UserContext";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 const Header = () => {
     const { keycloak, initialized } = useKeycloak();
@@ -20,7 +21,7 @@ const Header = () => {
         defaultValues: {search: ""}
     });
     const navigate = useNavigate();
-
+    const [loading, setLoading] = useState(true);
 
     const [isOpenSearch, setIsOpenSearch] = useState(false);
 
@@ -32,6 +33,12 @@ const Header = () => {
             navigate(`/search?search_query=${searchValue}&type=post&page=1`);
         }
     }
+
+    useEffect(() => {
+        if (userInfo) {
+            setLoading(false);
+        }
+    }, [userInfo]);
 
     return (
         <>
@@ -112,12 +119,19 @@ const Header = () => {
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="p-0 flex items-center justify-center rounded-full ml-2">
                                             <div className="select-none">
-                                                <img src={`
+                                                {loading
+                                                    ? (
+                                                        <AiOutlineLoading3Quarters className="animate-spin text-2xl text-gray-500" />
+                                                    )
+                                                    : (
+                                                        <img src={`
                                                     ${!userInfo?.avatarUrl ? '/user.webp' : userInfo.avatarUrl}
                                                 `}
-                                                    alt="user_image"
-                                                    className="w-10 h-10 rounded-full object-cover"
-                                                />
+                                                            alt="user_image"
+                                                            className="w-10 h-10 rounded-full object-cover"
+                                                        />
+                                                    )
+                                                }
                                             </div>
                                         </Button>
                                     </DropdownMenuTrigger>
@@ -137,9 +151,7 @@ const Header = () => {
                                                     to={`/user-profile/${keycloak?.tokenParsed?.preferred_username}?tab=createdPosts`}
                                                 >
                                                     <DropdownMenuItem className="h-full border-[1px] border-gray-500 rounded-3xl">
-
                                                         Xem trang cá nhân
-
                                                     </DropdownMenuItem>
                                                 </Link>
                                             </div>
@@ -187,7 +199,7 @@ const Header = () => {
                             ) : (
                                 <div className="flex items-center font-medium">
                                     <button onClick={() => keycloak.login()} className="px-3">Log In</button>
-                                    <button className="bg-white border-[2px] border-gray-500 rounded-md py-1 px-2">Sign Up</button>
+                                    <Link to="/user/register" className="bg-white border-[2px] border-gray-500 rounded-md py-1 px-2">Sign Up</Link>
                                 </div>
                             )}
                         </div>

@@ -1,4 +1,5 @@
 ﻿using Keycloak.AuthServices.Sdk.Admin;
+using Keycloak.AuthServices.Sdk.Admin.Models;
 using Keycloak.AuthServices.Sdk.Admin.Requests.Users;
 using Microsoft.Extensions.Options;
 using UserService.Commons;
@@ -144,5 +145,34 @@ public class KeycloakUserService : IKeycloakUserService
         await _rabbitMqProducer.PublishAsync("updated_user", System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(updatedUserEvent));
         
         return UserMappingExtensions.ToUserDto(userRepresentation, userProfileExtend, userFollowsDtos);
+    }
+
+    public async Task CreateUserAsync(CreateUserRequest createUserRequest)
+    {
+        string realm = _keycloakConfiguration.Realm;
+        var userRepresentation = new UserRepresentation()
+        {
+            Username = createUserRequest.UserName,
+            FirstName = createUserRequest.FirstName,
+            LastName = createUserRequest.LastName,
+            Email = createUserRequest.Email,
+            Enabled = true,
+            Credentials = new List<CredentialRepresentation>()
+            {
+                new CredentialRepresentation()
+                {
+                    Type = "password",
+                    Value = createUserRequest.Password,
+                    Temporary = false
+                }
+            }
+        };
+        var result = await _keycloakClient.CreateUserWithResponseAsync(realm, userRepresentation);
+        
+        if (!result.IsSuccessStatusCode)
+        {
+            var errorContent = await result.Content.ReadAsStringAsync();
+            throw new Exception($"Failed to update user: {result.StatusCode} - {errorContent}");
+        }
     }
 }

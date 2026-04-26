@@ -58,4 +58,18 @@ public class UserController : ControllerBase
             return BadRequest(e.Message);
         }
     }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterUser([FromBody] CreateUserRequest createUserRequest)
+    {
+        try
+        {
+            await _keycloakUserService.CreateUserAsync(createUserRequest);
+            return Ok();
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
 }

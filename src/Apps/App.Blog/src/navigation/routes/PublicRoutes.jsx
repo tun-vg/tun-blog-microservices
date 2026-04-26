@@ -2,6 +2,7 @@
 import { lazy, Suspense } from 'react';
 import Login from '../../pages/auth/Login';
 import MainLayout from '../../components/layouts/MainLayout';
+import { Outlet } from 'react-router-dom';
 
 const HomePage = lazy(
   () => import('../../pages/clients/HomePage')
@@ -20,6 +21,9 @@ const UnSubscribePage = lazy(
 );
 const TopPostsPage = lazy(
   () => import('../../pages/clients/TopPostsPage')
+);
+const CreateUserPage = lazy(
+  () => import('../../pages/profiles/CreateUserPage')
 );
 
 const publicRoutes = [
@@ -98,6 +102,22 @@ const publicRoutes = [
       {
         index: true,
         element: <TopPostsPage />
+      }
+    ]
+  },
+  {
+    path: '/user/register',
+    element:
+      <Suspense fallback={<div>Loading...</div>}>
+        {/* <MainLayout /> */}
+        <div>
+          <Outlet />
+        </div>
+      </Suspense>,
+    children: [
+      {
+        index: true,
+        element: <CreateUserPage />
       }
     ]
   }

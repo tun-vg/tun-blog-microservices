@@ -25,3 +25,8 @@ export const updateUser = (data) => {
     const url = `/user-api/user/update-user`;
     return API.put(url, data);
 }
+
+export const registerUser = (data) => {
+    const url = `/user-api/user/register`;
+    return API.post(url, data);
+}

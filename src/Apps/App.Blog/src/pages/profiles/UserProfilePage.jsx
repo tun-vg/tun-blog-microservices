@@ -118,7 +118,7 @@ const UserProfilePage = () => {
         <>
             <div className="container-app flex gap-5">
                 <div className="bg-gray-200 rounded-md w-3/12 flex flex-col items-center gap-2 py-3">
-                    <img src={`${authorInfo?.avatarUrl}`} alt='image' className='h-36 w-36 rounded-full object-cover' />
+                    <img src={`${authorInfo?.avatarUrl ? authorInfo.avatarUrl : '/user.webp'}`} alt='image' className='h-36 w-36 rounded-full object-cover' />
                     <div>
                         <div className="flex items-center gap-2">
                             <div className="font-bold text-lg">
