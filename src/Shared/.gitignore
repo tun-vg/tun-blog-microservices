@@ -1,0 +1,11 @@
+Shared.Common/bin
+Shared.Common/obj
+
+Shared.Contracts/bin
+Shared.Contracts/obj
+
+Shared.BuildingBlocks/bin
+Shared.BuildingBlacks/obj
+
+Shared.Grpc/bin
+Shared.Grpc/obj
