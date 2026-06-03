@@ -63,14 +63,24 @@ public class UserFollowService : IUserFollowService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<UserFollowDto>> GetFollowersAsync(string userId)
+    public async Task<List<UserFollowDto>> GetFollowersAsync(string userId)
     {
         var userFollows = await _dbContext.UserFollows
             .Where(u => u.FollowingId == userId)
             .ToListAsync();
 
-        var userFollowDtos = _mapper.Map<IEnumerable<UserFollowDto>>(userFollows);
+        var userFollowDtos = _mapper.Map<List<UserFollowDto>>(userFollows);
         
         return userFollowDtos;
+    }
+
+    public async Task<List<UserFollowDto>> GetFollowingsAsync(string userId)
+    {
+        var userFollowings = await _dbContext.UserFollows
+            .Where(u => u.FollowerId == userId)
+            .ToListAsync();
+        
+        var userFollowingDtos = _mapper.Map<List<UserFollowDto>>(userFollowings);
+        return userFollowingDtos;
     }
 }

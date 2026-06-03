@@ -8,25 +8,21 @@ import BackToTopButton from '../../components/common/Button/BackToTopButton.jsx'
 const HomePage = () => {
 
   return (
-    <div>
-      <main className='flex-1 pb-10 h-fit'>
+    <div className="bg-gray-50 min-h-screen">
+      <main className='flex-1 pb-12'>
         <div className='container-app'>
-
-          {/* Pho bien tren spiderum */}
-          <div className=''>
+          <div className='bg-white rounded-2xl shadow-sm px-3 sm:px-6 py-2 mt-4'>
             <PopularPosts />
-
             <FeaturedPosts />
 
-            <div>
-              <div className='flex gap-x-12'>
-                <div className='w-[70%]'>
-                  <RecommendedPosts />
-                </div>
+            <div className='flex flex-col lg:flex-row gap-x-8'>
+              <div className='w-full lg:w-[65%]'>
+                <RecommendedPosts />
+              </div>
 
-                <div className='h-32 w-[30%]'>
+              <div className='w-full lg:w-[35%] py-6'>
+                <div className="lg:sticky lg:top-20 flex flex-col gap-y-1">
                   <TopicsSection />
-
                   <SubscribeSection />
                 </div>
               </div>

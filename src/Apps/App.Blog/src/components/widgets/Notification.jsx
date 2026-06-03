@@ -6,265 +6,273 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 
 import { IoMdClose } from "react-icons/io";
 import { CiBellOn } from "react-icons/ci";
+import { BsBell, BsBellFill } from "react-icons/bs";
 import { SlOptionsVertical } from "react-icons/sl";
+import { GoComment, GoHeart } from "react-icons/go";
+import { FiUserPlus } from "react-icons/fi";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { useKeycloak } from "@react-keycloak/web";
 import * as signalR from "@microsoft/signalr";
-import { use } from "react";
+
+// Map notification type → icon + color
+const NotifIcon = ({ type }) => {
+    const map = {
+        comment:  { icon: <GoComment />,   bg: "bg-blue-100",   text: "text-blue-600"   },
+        like:     { icon: <GoHeart />,     bg: "bg-rose-100",   text: "text-rose-500"   },
+        follow:   { icon: <FiUserPlus />,  bg: "bg-green-100",  text: "text-green-600"  },
+    };
+    const cfg = map[type?.toLowerCase()] ?? { icon: <BsBell />, bg: "bg-amber-100", text: "text-amber-600" };
+    return (
+        <span className={`flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0 ${cfg.bg} ${cfg.text} text-sm`}>
+            {cfg.icon}
+        </span>
+    );
+};
 
 const Notification = () => {
     const { keycloak, initialized } = useKeycloak();
     const navigate = useNavigate();
 
     const userId = keycloak?.tokenParsed?.sub;
-    const [openNotify, setOpenNotify] = useState(false);
-    const [countUnreadNotify, setCountUnreadNotify] = useState(0);
-    const [dataListNotify, setDataListNotify] = useState([]);
-    const [isNotificationSub, setIsNotifycationSub] = useState(false);
-    const [notificationId, setNotificationId] = useState(null);
-
-    const [pageNumber, setPageNumber] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
+    const [openNotify, setOpenNotify]             = useState(false);
+    const [countUnread, setCountUnread]           = useState(0);
+    const [dataList, setDataList]                 = useState([]);
+    const [activeMenu, setActiveMenu]             = useState(null); // notificationId
+    const [pageNumber, setPageNumber]             = useState(1);
+    const [hasMore, setHasMore]                   = useState(true);
+    const [isLoading, setIsLoading]               = useState(false);
     const pageSize = 10;
 
     const notifyRef = useRef();
     const loaderRef = useRef();
-    useOutsideClick(notifyRef, () => setOpenNotify(false));
-    useOutsideClick(notifyRef, () => setIsNotifycationSub(false));
-
-    const handleOpenNotify = () => {
-        if (!openNotify) {
-            if (initialized && keycloak.authenticated && userId) {
-                setPageNumber(1);
-                setHasMore(true);
-                setDataListNotify([]);
-                fetchNotifications(1, true);
-                setOpenNotify(true);
-                setCountUnreadNotify(0);
-            }
-        } else {
-            setOpenNotify(false);
-        }
-    }
+    useOutsideClick(notifyRef, () => { setOpenNotify(false); setActiveMenu(null); });
 
     const fetchNotifications = async (page = 1, isReset = false) => {
-        if (userId && !isLoading) {
-            try {
-                setIsLoading(true);
-                const response = await GetNotificationsByUserId(userId, page, pageSize);
-                const newItems = response.items || [];
-
-                if (isReset) {
-                    setDataListNotify(newItems);
-                } else {
-                    setDataListNotify(prev => [...prev, ...newItems]);
-                }
-
-                setCountUnreadNotify(response.countUnreadNotify);
-                setHasMore(newItems.length === pageSize);
-            } catch (error) {
-                console.error("API Error:", error);
-            } finally {
-                setIsLoading(false);
-            }
+        if (!userId || isLoading) return;
+        try {
+            setIsLoading(true);
+            const response = await GetNotificationsByUserId(userId, page, pageSize);
+            const items = response.items || [];
+            setDataList(prev => isReset ? items : [...prev, ...items]);
+            setCountUnread(response.countUnreadNotify ?? 0);
+            setHasMore(items.length === pageSize);
+        } catch (err) {
+            console.error("Notification API error:", err);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    const loadMoreNotifications = () => {
+    const handleOpenNotify = () => {
+        if (!openNotify && initialized && keycloak.authenticated && userId) {
+            setPageNumber(1);
+            setHasMore(true);
+            setDataList([]);
+            fetchNotifications(1, true);
+            setCountUnread(0);
+        }
+        setOpenNotify(v => !v);
+        setActiveMenu(null);
+    };
+
+    const loadMore = () => {
         if (hasMore && !isLoading) {
-            const nextPage = pageNumber + 1;
-            setPageNumber(nextPage);
-            fetchNotifications(nextPage, false);
+            const next = pageNumber + 1;
+            setPageNumber(next);
+            fetchNotifications(next, false);
         }
     };
 
+    // Initial fetch (for unread badge)
     useEffect(() => {
-        if (initialized && keycloak.authenticated) {
-            fetchNotifications();
-        }
+        if (initialized && keycloak.authenticated) fetchNotifications();
     }, [initialized, keycloak.authenticated, userId]);
 
+    // Infinite scroll observer
     useEffect(() => {
         if (!openNotify || !hasMore) return;
-
         const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && hasMore && !isLoading) {
-                    loadMoreNotifications();
-                }
-            },
+            ([e]) => { if (e.isIntersecting) loadMore(); },
             { threshold: 0.1 }
         );
-
-        const currentLoader = loaderRef.current;
-        if (currentLoader) {
-            observer.observe(currentLoader);
-        }
-
-        return () => {
-            if (currentLoader) {
-                observer.unobserve(currentLoader);
-            }
-        };
+        const el = loaderRef.current;
+        if (el) observer.observe(el);
+        return () => { if (el) observer.unobserve(el); };
     }, [openNotify, hasMore, isLoading, pageNumber]);
 
+    // SignalR real-time
     useEffect(() => {
-        if (!initialized && !keycloak.authenticated && !userId) {
-            return;
-        }
+        if (!initialized || !keycloak.authenticated || !userId) return;
+        const conn = new signalR.HubConnectionBuilder()
+            .withUrl("http://localhost:5074/notificationHub", {
+                accessTokenFactory: () => keycloak.token,
+            })
+            .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Warning)
+            .build();
 
-        if (initialized && !keycloak.authenticated) {
-            setDataListNotify([]);
-            setCountUnreadNotify(0);
-        }
+        conn.start()
+            .then(() => {
+                conn.on("ReceiveNotification", (n) => {
+                    setDataList(prev => [n, ...prev]);
+                    setCountUnread(prev => prev + 1);
+                });
+            })
+            .catch(err => console.error("SignalR:", err));
 
-        if (userId) {
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl("http://localhost:5074/notificationHub", {
-                    accessTokenFactory: () => keycloak.token,
-                })
-                .withAutomaticReconnect()
-                .configureLogging(signalR.LogLevel.Information)
-                .build();
+        return () => conn.stop();
+    }, [initialized, keycloak.authenticated, userId]);
 
-            connection.start()
-                .then(() => {
-                    console.log("SignalR Connected with userId:", userId);
+    if (!initialized) return <CiBellOn className="w-6 h-6 opacity-30" />;
 
-                    connection.on("ReceiveNotification", (notification) => {
-                        setDataListNotify(prev => [notification, ...prev]);
-                        setCountUnreadNotify(prev => prev + 1);
-                    });
-                })
-                .catch(err => console.error("SignalR error:", err));
-
-            return () => {
-                if (connection) {
-                    connection.stop();
+    return (
+        <div className="relative" ref={notifyRef}>
+            {/* ── Bell button ── */}
+            <button
+                onClick={handleOpenNotify}
+                className={`relative flex items-center justify-center w-9 h-9 rounded-full transition-colors ${openNotify ? 'bg-amber-100 text-amber-700' : 'hover:bg-gray-100 text-gray-600'}`}
+            >
+                {openNotify
+                    ? <BsBellFill className="w-5 h-5" />
+                    : <BsBell className="w-5 h-5" />
                 }
-            };
-        }
-    }, [initialized, keycloak.authenticated, userId])
+                {countUnread > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 leading-none ring-2 ring-white">
+                        {countUnread > 99 ? "99+" : countUnread}
+                    </span>
+                )}
+            </button>
 
-    const deleteAllNotifyHandler = () => {
-        
-    }
+            {/* ── Dropdown panel ── */}
+            {openNotify && (
+                <div className="absolute right-0 top-[calc(100%+8px)] w-[400px] bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.14)] border border-gray-100 overflow-hidden z-50">
 
-    if (!initialized) {
-        return <CiBellOn className='w-6 h-6 opacity-20' />; 
-    }
-
-    return <>
-        <div className='flex'>
-            <div className='relative w-full h-12 flex justify-end items-center' ref={notifyRef}>
-                <div onClick={() => { handleOpenNotify() }} className='h-12 flex items-center cursor-pointer'>
-                    <CiBellOn className='w-6 h-6' />
-                    {countUnreadNotify > 0 &&
-                        <div 
-                            className='absolute ml-[10px] mt-[-18px] bg-red-500 rounded-full w-fit h-fit px-[2px] text-white text-center text-sm'
-                        >
-                            {countUnreadNotify}
+                    {/* Header */}
+                    <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100">
+                        <div>
+                            <h3 className="font-bold text-gray-900 text-base">Thông báo</h3>
+                            {countUnread > 0 && (
+                                <p className="text-xs text-amber-600 font-medium mt-0.5">{countUnread} chưa đọc</p>
+                            )}
                         </div>
-                    }
-                </div>
-                {openNotify && (
-                    <div className='bg-slate-100 absolute right-1 h-fit min-w-[378px] w-3/12 top-full border-solid border-[1px] rounded-xl shadow-[0px_0px_20px_0px_rgba(0,0,0,0.25)]'>
-                        {/* <div className='absolute z-50 h-auto max-h-[calc(100vh-115px)] w-[378px] rounded-xl bg-white shadow-[0px_0px_20px_0px_rgba(0,0,0,0.25)]'> */}
-                        <div className='flex justify-between items-center p-2'>
-                            <div>Thông báo</div>
-                            <IoMdClose 
+                        <div className="flex items-center gap-2">
+                            <button className="text-xs text-gray-500 hover:text-amber-600 font-medium px-2 py-1 rounded-lg hover:bg-amber-50 transition-colors">
+                                Đánh dấu tất cả
+                            </button>
+                            <button
                                 onClick={() => setOpenNotify(false)}
-                            />
-                        </div>
-                        <div className='flex items-center justify-end gap-x-8 border-b px-4 py-4 text-sm font-normal'>
-                            <div className='cursor-pointer'>Đánh dấu đã đọc</div>
-                            <div className='cursor-pointer' onClick={() => {
-                                deleteAllNotifyHandler();
-                            }}>Gỡ tất cả</div>
-                        </div>
-                        <hr />
-                        {!isLoading && (dataListNotify === null || dataListNotify.length === 0) && (
-                            <div className='p-3'>Không có dữ liệu</div>
-                        )}
-
-                        <div className='overflow-y-auto max-h-[70vh]'>
-                            {dataListNotify?.map(item => {
-                                return <div 
-                                            key={item.notificationId} 
-                                            className='relative hover:bg-slate-200'
-                                        >
-                                    <div className={`flex text-left justify-between items-center pl-2 pt-2 pb-2 ${item.status === true && 'bg-white hover:bg-slate-200'}`}>
-                                        <div 
-                                            className='w-11/12'
-                                            onClick={() => {
-                                                setOpenNotify(false);
-                                                navigate(`${item.link}`);
-                                            }}
-                                        >
-                                            <div dangerouslySetInnerHTML={{ __html: item.contentVi }} />
-                                            <div className='w-fit'>
-                                                <p data-tooltip-id={`my-tooltip-${item.notificationId}`}>{converteTimeToString(item.createdAt)}</p>
-                                                <ReactTooltip
-                                                    id={`my-tooltip-${item.notificationId}`}
-                                                    place="right"
-                                                    content={converterTimeToDateTime(item.createdAt)}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className='pr-2'>
-                                            <SlOptionsVertical className='cursor-pointer p-2 h-12 w-9' onClick={() => {
-                                                if (!isNotificationSub) {
-                                                    setIsNotifycationSub(true);
-                                                    setNotificationId(item.notificationId);
-                                                } else {
-                                                    setIsNotifycationSub(false);
-                                                    setNotificationId(null);
-                                                }
-                                            }} />
-                                        </div>
-                                        {isNotificationSub && notificationId === item.notificationId && <div className='absolute right-4 bg-white select-none'>
-                                            <ul className="absolute -top-8 right-[20px] whitespace-nowrap rounded-md bg-white text-xs font-normal shadow-[0px_6px_58px_rgba(121,145,173,0.2)]">
-                                                {/* Mark as read or unread */}
-                                                <li
-                                                    className="cursor-pointer p-2 hover:text-primary-100"
-                                                >
-                                                    Đánh dấu là đã đọc
-                                                </li>
-
-                                                {/* Remote this notification */}
-                                                <li
-                                                    className="cursor-pointer p-2 hover:text-red-500"
-                                                    onClick={() => {
-                                                        console.log("Call api delete notify by id: " + item.notificationId);
-                                                        deleteNotifyHandler(item);
-                                                    }}
-                                                >
-                                                    Gỡ thông báo
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        }
-                                    </div>
-                                    <hr />
-                                </div>
-                            })}
-                            {hasMore && (
-                                <div ref={loaderRef} className='p-3 text-center text-sm text-gray-500'>
-                                    {isLoading ? 'Đang tải...' : 'Cuộn xuống để tải thêm'}
-                                </div>
-                            )}
-                            {!hasMore && dataListNotify.length > 0 && (
-                                <div className='p-3 text-center text-sm text-gray-500'>
-                                    Đã tải hết thông báo
-                                </div>
-                            )}
+                                className="w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+                            >
+                                <IoMdClose className="text-base" />
+                            </button>
                         </div>
                     </div>
-                )}
-            </div>
+
+                    {/* List */}
+                    <div className="overflow-y-auto max-h-[70vh]">
+
+                        {/* Empty state */}
+                        {!isLoading && dataList.length === 0 && (
+                            <div className="flex flex-col items-center justify-center py-14 text-gray-400">
+                                <BsBell className="text-4xl mb-3 opacity-30" />
+                                <p className="text-sm font-medium">Chưa có thông báo nào</p>
+                                <p className="text-xs mt-1">Khi có hoạt động mới, bạn sẽ thấy ở đây.</p>
+                            </div>
+                        )}
+
+                        {/* Items */}
+                        {dataList.map((item) => (
+                            <div key={item.notificationId} className="relative group">
+                                <div
+                                    className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors ${item.status ? 'bg-white hover:bg-gray-50' : 'bg-blue-50/60 hover:bg-blue-50'}`}
+                                    onClick={() => {
+                                        setOpenNotify(false);
+                                        navigate(item.link);
+                                    }}
+                                >
+                                    {/* Type icon */}
+                                    <NotifIcon type={item.type} />
+
+                                    {/* Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <div
+                                            className="text-sm text-gray-800 leading-snug [&_b]:font-semibold [&_b]:text-gray-900"
+                                            dangerouslySetInnerHTML={{ __html: item.contentVi }}
+                                        />
+                                        <span
+                                            data-tooltip-id={`notif-${item.notificationId}`}
+                                            className="text-xs text-amber-600 font-medium mt-1 inline-block"
+                                        >
+                                            {converteTimeToString(item.createdAt)}
+                                        </span>
+                                        <ReactTooltip
+                                            id={`notif-${item.notificationId}`}
+                                            place="right"
+                                            content={converterTimeToDateTime(item.createdAt)}
+                                            className="z-50"
+                                        />
+                                    </div>
+
+                                    {/* Unread dot */}
+                                    {!item.status && (
+                                        <span className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1.5" />
+                                    )}
+
+                                    {/* Options button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setActiveMenu(activeMenu === item.notificationId ? null : item.notificationId);
+                                        }}
+                                        className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-all flex-shrink-0"
+                                    >
+                                        <SlOptionsVertical className="text-xs" />
+                                    </button>
+                                </div>
+
+                                {/* Context menu */}
+                                {activeMenu === item.notificationId && (
+                                    <div className="absolute right-10 top-2 z-50 bg-white rounded-xl shadow-lg border border-gray-100 py-1 min-w-[160px]">
+                                        <button
+                                            className="w-full text-left text-sm px-4 py-2 hover:bg-gray-50 text-gray-700 transition-colors"
+                                            onClick={(e) => { e.stopPropagation(); setActiveMenu(null); }}
+                                        >
+                                            Đánh dấu là đã đọc
+                                        </button>
+                                        <button
+                                            className="w-full text-left text-sm px-4 py-2 hover:bg-red-50 text-red-500 transition-colors"
+                                            onClick={(e) => { e.stopPropagation(); setActiveMenu(null); }}
+                                        >
+                                            Gỡ thông báo
+                                        </button>
+                                    </div>
+                                )}
+
+                                <div className="h-px bg-gray-100 mx-4" />
+                            </div>
+                        ))}
+
+                        {/* Infinite scroll loader */}
+                        {hasMore && (
+                            <div ref={loaderRef} className="flex items-center justify-center py-4 text-gray-400">
+                                {isLoading
+                                    ? <AiOutlineLoading3Quarters className="animate-spin text-amber-500 text-lg" />
+                                    : <span className="text-xs">Cuộn để tải thêm</span>
+                                }
+                            </div>
+                        )}
+
+                        {!hasMore && dataList.length > 0 && (
+                            <div className="py-4 text-center text-xs text-gray-400">
+                                Đã xem hết thông báo
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
-    </>
+    );
 }
 
 export default Notification;

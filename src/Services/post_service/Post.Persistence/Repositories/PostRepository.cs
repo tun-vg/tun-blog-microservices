@@ -124,14 +124,14 @@ public class PostRepository : IPostRepository
         return posts;
     }
 
-    public async Task<(List<Post.Domain.Entities.Post>, int)> GetPostsByUserId(int page, int pageSize, string userId)
+    public async Task<(List<Post.Domain.Entities.Post>, int)> GetPostsByUserId(int page, int pageSize, string userId, int status)
     {
         var posts = await _context.Posts
-            .Where(p => p.AuthorId.ToString() == userId)
+            .Where(p => p.AuthorId.ToString() == userId && p.Status == status)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
-        var totalCount = await _context.Posts.CountAsync(p => p.AuthorId.ToString() == userId);
+        var totalCount = await _context.Posts.CountAsync(p => p.AuthorId.ToString() == userId && p.Status == status);
         return (posts, totalCount);
     }
 
@@ -193,6 +193,7 @@ public class PostRepository : IPostRepository
 
         var query = _context.Posts
             .AsNoTracking()
+            .Where(p => p.Status == 1)
             .Include(c => c.Category)
             .Join(
                 _context.PostAuthors,
@@ -418,85 +419,6 @@ public class PostRepository : IPostRepository
         else throw new Exception("Post not found");
         
         return (point, action);
-    }
-
-    public async Task<bool> AddBookMarkPost(Guid postId, Guid userId)
-    {
-        var postBookMark = await _context.PostBookMarks
-            .AsNoTracking()
-            .Where(b => b.PostId == postId && b.UserId == userId)
-            .FirstOrDefaultAsync();
-
-        if (postBookMark == null)
-        {
-            var bookMark = new PostBookMark()
-            {
-                PostBookMarkId = Guid.NewGuid(),
-                PostId = postId,
-                UserId = userId,
-                CreatedAt = DateTime.Now
-            };
-            await _context.PostBookMarks.AddAsync(bookMark);
-            return await _context.SaveChangesAsync() > 0;
-        }
-        else return false;
-    }
-
-    public async Task<bool> RemoveBookMarkPost(Guid postId, Guid userId)
-    {
-        var postBookMark = await _context.PostBookMarks
-            .Where(b => b.PostId == postId && b.UserId == userId)
-            .FirstOrDefaultAsync();
-        if (postBookMark != null)
-        {
-            _context.PostBookMarks.Remove(postBookMark);
-            return await _context.SaveChangesAsync() > 0;
-        }
-        else return false;
-    }
-
-    public async Task<bool> CheckUserBookMarkPost(Guid postId, Guid userId)
-    {
-        var postBookMarks = await _context.PostBookMarks
-            .AsNoTracking()
-            .Where(b => b.PostId == postId && b.UserId == userId)
-            .FirstOrDefaultAsync();
-        return postBookMarks != null;
-    }
-
-    public async Task<(List<Post.Domain.Entities.Post>, int)> GetBookMarkPostsByUserId(int page, int pageSize,
-        Guid userId)
-    {
-        var queryable = from pbm in _context.PostBookMarks
-            join p in _context.Posts on pbm.PostId equals p.PostId
-            where pbm.UserId == userId
-            orderby pbm.CreatedAt descending
-            select new Post.Domain.Entities.Post()
-            {
-                PostId = p.PostId,
-                Title = p.Title,
-                Slug = p.Slug,
-                Content = p.Content,
-                AuthorId = p.AuthorId,
-                CategoryId = p.CategoryId,
-                Category = p.Category,
-                Approved = p.Approved,
-                Point = p.Point,
-                UpPoint = p.UpPoint,
-                DownPoint = p.DownPoint,
-                ViewCount = p.ViewCount,
-                ReadingTime = p.ReadingTime,
-                Status = p.Status
-            };
-
-        var posts = await queryable
-            .AsNoTracking()
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-        int totalCount = await queryable.AsNoTracking().CountAsync();
-        
-        return (posts, totalCount);
     }
     
     #endregion Actions Post

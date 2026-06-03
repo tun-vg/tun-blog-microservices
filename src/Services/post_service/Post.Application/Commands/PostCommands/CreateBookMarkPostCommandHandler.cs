@@ -5,15 +5,15 @@ namespace Post.Application.Commands.PostCommands;
 
 public class CreateBookMarkPostCommandHandler : IRequestHandler<CreateBookMarkPostCommand, bool>
 {
-    private readonly IPostRepository _postRepository;
+    private readonly IPostBookMarkRepository _postBookMarkRepository;
     
-    public CreateBookMarkPostCommandHandler(IPostRepository postRepository)
+    public CreateBookMarkPostCommandHandler(IPostBookMarkRepository postBookMarkRepository)
     {
-        _postRepository = postRepository;
+        _postBookMarkRepository = postBookMarkRepository;
     }
 
     public async Task<bool> Handle(CreateBookMarkPostCommand request, CancellationToken cancellationToken)
     {
-        return await _postRepository.AddBookMarkPost(request.PostId, request.UserId);
+        return await _postBookMarkRepository.AddBookMarkPost(request.PostId, request.UserId);
     }
 }

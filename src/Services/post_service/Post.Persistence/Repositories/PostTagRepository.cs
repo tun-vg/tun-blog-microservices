@@ -36,9 +36,19 @@ public class PostTagRepository : IPostTagRepository
                          TagName = t.Name
                      };
         return await query.ToListAsync();
+    }
 
-        //return await _context.PostTags
-        //    .Where(pt => pt.PostId == postId)
-        //    .ToListAsync();
+    public async Task DeletePostTagByPostId(Guid postId)
+    {
+        var postTags =  await _context.PostTags.Where(p => p.PostId == postId).ToListAsync();
+        _context.PostTags.RemoveRange(postTags);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeletePostTagByTagId(Guid tagId)
+    {
+        var postTags = await _context.PostTags.Where(p => p.TagId == tagId).ToListAsync();
+        _context.PostTags.RemoveRange(postTags);
+        await _context.SaveChangesAsync();
     }
 }

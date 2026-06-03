@@ -24,7 +24,7 @@ public class GetPostsByUserIdQueryHandler : IRequestHandler<GetPostsByUserIdQuer
 
     public async Task<PagedResult<PostDto>> Handle(GetPostsByUserIdQuery request, CancellationToken cancellationToken)
     {
-        var (posts, count) = await _postRepository.GetPostsByUserId(request.Page, request.PageSize, request.UserId);
+        var (posts, count) = await _postRepository.GetPostsByUserId(request.Page, request.PageSize, request.UserId, request.Status);
         var postDtos = _mapper.Map<List<PostDto>>(posts);
         return PagedResult<PostDto>.Create(postDtos, request.Page, request.PageSize, count);
     }

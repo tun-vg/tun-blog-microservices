@@ -38,6 +38,7 @@ builder.Services.AddScoped<ITagRepository, TagRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPostTagRepository, PostTagRepository>();
 builder.Services.AddScoped<IPostVoteRepository, PostVoteRepository>();
+builder.Services.AddScoped<IPostBookMarkRepository, PostBookMarkRepository>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddContract();
 builder.Services.AddScoped<IPostAuthorRepository, PostAuthorRepository>();

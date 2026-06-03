@@ -19,7 +19,7 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("get-posts")]
-    public async Task<IActionResult> GetPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? search, [FromQuery] string? sortBy, [FromQuery] bool isDescending)
+    public async Task<IActionResult> GetPosts([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string? search, [FromQuery] string? sortBy,[FromQuery] bool isDescending)
     {
         GetPostsQuery query = new GetPostsQuery(page, pageSize, search, sortBy, isDescending);
         var result = await _mediator.Send(query);
@@ -35,7 +35,7 @@ public class PostController : ControllerBase
     }
 
     [HttpPost("create-post")]
-    public async Task<IActionResult> CreatePost([FromForm] CreatePostRequestDto dto)
+    public async Task<IActionResult> CreatePost([FromBody] CreatePostRequestDto dto)
     {
         using var ms = new MemoryStream();
         if (dto.Image != null)
@@ -47,6 +47,7 @@ public class PostController : ControllerBase
             Content = dto.Content,
             AuthorId = dto.AuthorId,
             CategoryId = dto.CategoryId,
+            Status = dto.Status,
             PostTags = dto.PostTags,
             UserName = dto.UserName,
             Email = dto.Email,
@@ -95,9 +96,9 @@ public class PostController : ControllerBase
     }
 
     [HttpGet("get-posts-by-userId")]
-    public async Task<IActionResult> GetPostsByUserId([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string userId)
+    public async Task<IActionResult> GetPostsByUserId([FromQuery] int page, [FromQuery] int pageSize, [FromQuery] string userId,  [FromQuery] int status)
     {
-        var result = await _mediator.Send(new GetPostsByUserIdQuery(page, pageSize, userId));
+        var result = await _mediator.Send(new GetPostsByUserIdQuery(page, pageSize, userId, status));
         return Ok(result);
     }
 

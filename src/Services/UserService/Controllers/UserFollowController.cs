@@ -10,10 +10,12 @@ namespace UserService.Controllers;
 public class UserFollowController : ControllerBase
 {
     private readonly IUserFollowService _userFollowService;
+    private readonly IKeycloakUserService _keycloakUserService;
 
-    public UserFollowController(IUserFollowService userFollowService)
+    public UserFollowController(IUserFollowService userFollowService, IKeycloakUserService keycloakUserService)
     {
         _userFollowService = userFollowService;
+        _keycloakUserService = keycloakUserService;
     }
     
     [HttpPost("follow")]
@@ -28,5 +30,35 @@ public class UserFollowController : ControllerBase
     {
         await _userFollowService.UnfollowUserAsync(userFollowDto);
         return Ok();
+    }
+    
+    
+
+    [HttpGet("get-followers/{userId}")]
+    public async Task<IActionResult> GetFollowers([FromRoute] string userId)
+    {
+        try
+        {
+            var followers = await _keycloakUserService.GetFollowersAsync(userId);
+            return Ok(followers);
+        }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
+    }
+
+    [HttpGet("get-followings/{userId}")]
+    public async Task<IActionResult> GetFollowings([FromRoute] string userId)
+    {
+        try
+        {
+            var followings = await _keycloakUserService.GetFollowingAsync(userId);
+            return Ok(followings);
+        }
+        catch (Exception e)
+        {
+            return NotFound(e.Message);
+        }
     }
 }

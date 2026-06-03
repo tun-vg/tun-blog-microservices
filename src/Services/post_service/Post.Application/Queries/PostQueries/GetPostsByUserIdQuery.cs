@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Post.Application.Queries.PostQueries;
 
-[Cached("posts-user:user={UserId}:page={Page}:size={PageSize}", 600)]
+[Cached("posts-user:user={UserId}:page={Page}:size={PageSize}:status={Status}", 600)]
 public class GetPostsByUserIdQuery : IRequest<PagedResult<PostDto>>
 {
     public int Page { get; set; } = 1;
@@ -19,12 +19,13 @@ public class GetPostsByUserIdQuery : IRequest<PagedResult<PostDto>>
 
     public string UserId { get; set; }
 
+    public int Status { get; set; }
 
-
-    public GetPostsByUserIdQuery(int page, int pageSize, string userId)
+    public GetPostsByUserIdQuery(int page, int pageSize, string userId, int status)
     {
         Page = page;
         PageSize = pageSize;
         UserId = userId;
+        Status = status;
     }
 }

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { extractFirstImage, getPreviewContent } from "../../utils/content";
 import { converteTimeToString } from "../../utils/handleTimeShow";
 import { BsCaretUp } from "react-icons/bs";
@@ -6,68 +6,79 @@ import { FaRegEye } from "react-icons/fa6";
 import { GoComment } from "react-icons/go";
 
 const PostListCard = ({ post, showAction = true }) => {
-    const navigate = useNavigate();
+    const image = extractFirstImage(post.content);
 
     return <Link
-        className='flex gap-x-4 mt-2 mb-6 bg-gray-50'
+        className='group flex flex-col sm:flex-row sm:gap-x-3 rounded-xl border border-transparent hover:border-gray-200 hover:shadow-md transition-all duration-200 bg-white overflow-hidden min-w-0'
         to={`/post/${post.postId}/${post.slug}`}
     >
-        <img src={extractFirstImage(post.content)} alt="" className="rounded-md max-h-[174px] max-w-[232px] object-cover" />
-
-        <div className='flex flex-col gap-y-1 w-full justify-between'>
-            <div className=' flex justify-between items-center'>
-                <div className='flex gap-x-2 items-center'>
-                    <p className='font-light text-base'>{post.categoryName}</p>
-                    <div className='bg-gray-400 h-1 w-1 rounded-sm'></div>
-                    <p className='text-gray-400'>{post.readingTime} phút đọc</p>
-                </div>
-                {/* <CiBookmark
-                    className='text-gray-400 w-6 h-6'
-                // onClick={() => handlerBookmarkPost()}    
-                /> */}
+        {/* Ảnh: full-width trên mobile, cố định trên sm+ */}
+        {image && (
+            <div className="overflow-hidden sm:flex-shrink-0 sm:rounded-lg sm:m-3 sm:mr-0">
+                <img
+                    src={image}
+                    alt=""
+                    className="w-full h-44 sm:h-[140px] sm:w-[200px] sm:rounded-lg object-cover group-hover:scale-105 transition-transform duration-300"
+                />
             </div>
-            <div className='font-semibold text-xl'>{post.title}</div>
-            <p className="text-gray-600 text-sm">
-                {getPreviewContent(post.content, 100)}
+        )}
+
+        <div className='flex flex-col gap-y-2 p-3 justify-between min-w-0 flex-1'>
+            <div className='flex gap-x-2 items-center'>
+                {post.categoryName && (
+                    <span className='text-xs font-medium bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full'>
+                        {post.categoryName}
+                    </span>
+                )}
+                <span className='text-gray-400 text-xs'>{post.readingTime} phút đọc</span>
+            </div>
+
+            <div className='font-bold text-[15px] sm:text-[17px] leading-snug text-gray-900 group-hover:text-amber-700 transition-colors line-clamp-2 break-words overflow-hidden'>
+                {post.title}
+            </div>
+            <p className="text-gray-500 text-sm line-clamp-2 break-words overflow-hidden">
+                {getPreviewContent(post.content, 120)}
             </p>
-            
+
             {showAction ? (
-                <div className="flex justify-between">
-                    <div className='flex gap-x-2 items-center'>
-                        <img src={`
-                                    ${post.authorAvatar ? post.authorAvatar : '/user.webp'}
-                                `}
+                <div className="flex justify-between items-center flex-wrap gap-1">
+                    <div className='flex gap-x-2 items-center min-w-0'>
+                        <img
+                            src={post.authorAvatar ? post.authorAvatar : '/user.webp'}
                             alt='avatar'
-                            className='h-7 w-7 rounded-2xl object-cover'
+                            className='h-7 w-7 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0'
                         />
-                        <h3 className='font-semibold text-sm'>{post.authorFirstName} {post.authorLastName}</h3>
-                        <div className='bg-gray-400 h-1 w-1 rounded-sm'></div>
-                        <div className='text-gray-400'>{converteTimeToString(post.createdAt)}</div>
+                        <span className='font-medium text-sm text-gray-700 truncate max-w-[120px] sm:max-w-none'>{post.authorFirstName} {post.authorLastName}</span>
+                        <span className='text-gray-300'>·</span>
+                        <span className='text-gray-400 text-xs'>{converteTimeToString(post.createdAt)}</span>
                     </div>
-                    <div className="flex gap-6">
-                        <span className="flex gap-1 items-center">
-                            <BsCaretUp className="text-2xl" />
+                    <div className="flex gap-3 text-gray-400 text-sm">
+                        <span className="flex gap-1 items-center hover:text-amber-600">
+                            <BsCaretUp className="text-base" />
                             {post.upPoint}
                         </span>
-                        <span className="flex gap-1 items-center">
-                            <FaRegEye className="text-xl pt-[1px]" />
+                        <span className="flex gap-1 items-center hover:text-blue-500">
+                            <FaRegEye className="text-base" />
                             {post.viewCount}
                         </span>
-                        <span className="flex gap-1 items-center">
-                            <GoComment className="text-xl pt-[1px]" />
+                        <span className="flex gap-1 items-center hover:text-green-500">
+                            <GoComment className="text-base" />
                             {post.commentCount}
                         </span>
                     </div>
                 </div>
             ) : (
                 <div className='flex gap-x-2 items-center'>
-                    <img src={`${post.authorAvatar}`} alt='avatar' className='h-7 w-7 rounded-2xl object-cover' />
-                    <h3 className='font-semibold text-sm'>{post.authorFirstName} {post.authorLastName}</h3>
-                    <div className='bg-gray-400 h-1 w-1 rounded-sm'></div>
-                    <div className='text-gray-400'>{converteTimeToString(post.createdAt)}</div>
+                    <img
+                        src={post.authorAvatar ? post.authorAvatar : '/user.webp'}
+                        alt='avatar'
+                        className='h-7 w-7 rounded-full object-cover ring-2 ring-white shadow-sm flex-shrink-0'
+                    />
+                    <span className='font-medium text-sm text-gray-700 truncate'>{post.authorFirstName} {post.authorLastName}</span>
+                    <span className='text-gray-300'>·</span>
+                    <span className='text-gray-400 text-xs'>{converteTimeToString(post.createdAt)}</span>
                 </div>
             )}
-
         </div>
     </Link>
 }

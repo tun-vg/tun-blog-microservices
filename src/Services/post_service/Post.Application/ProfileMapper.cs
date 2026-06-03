@@ -36,14 +36,14 @@ public class ProfileMapper : AutoMapper.Profile
 
         CreateMap<Tag, TagDto>()
             .ForMember(tagDto => tagDto.TagId, opt => opt.MapFrom(src => src.TagId))
-            .ForMember(tagDto => tagDto.Name, opt => opt.MapFrom(src => src.Name))
+            .ForMember(tagDto => tagDto.TagName, opt => opt.MapFrom(src => src.Name))
             .ForMember(tagDto => tagDto.Slug, opt => opt.MapFrom(src => src.Slug))
             .ForMember(tagDto => tagDto.CategoryId, opt => opt.MapFrom(src => src.CategoryId))
             .ForMember(tagDto => tagDto.CategoryName, opt => opt.MapFrom(src => src.CategoryName));
 
         CreateMap<TagDto, Tag>()
             .ForMember(tag => tag.TagId, opt => opt.MapFrom(src => src.TagId))
-            .ForMember(tag => tag.Name, opt => opt.MapFrom(src => src.Name))
+            .ForMember(tag => tag.Name, opt => opt.MapFrom(src => src.TagName))
             .ForMember(tag => tag.Slug, opt => opt.MapFrom(src => src.Slug))
             .ForMember(tag => tag.CategoryId, opt => opt.MapFrom(src => src.CategoryId));
         

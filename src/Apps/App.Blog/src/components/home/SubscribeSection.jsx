@@ -23,18 +23,35 @@ const SubscribeSection = () => {
 
     return (
         <>
-            {/* Email Sub */}
-            <div className='border-gray-200 border-[1px] w-full h-fit mt-7 p-5'>
-                <form
-                    onSubmit={handleSubmit(subscription)}
-                    className='flex flex-col gap-y-3'
-                >
-                    <h1 className='font-bold text-xl'>CÁC BÀI VIẾT NỔI BẬT BẠN KHÔNG NÊN BỎ LỠ!</h1>
-                    <p>Chủ nhật hàng tuần, chúng mình sẽ gửi bạn email tổng hợp những bài viết đáng đọc nhất trong tuần.</p>
-                    <label for="email">Chúng mình có thể gửi thư cho bạn qua:</label>
-                    <input type='email' {...register('email', { required: "Vui lòng nhập email!" })} required placeholder='Email của bạn' className='p-1 border-gray-300 border-[1px] p-2' />
-                    <input type='submit' value="ĐĂNG KÝ" className='w-full bg-blue-500 text-white font-bold p-2' />
-                </form>
+            <div className='w-full mt-5 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-500 to-orange-500 shadow-md'>
+                <div className="p-5">
+                    <form
+                        onSubmit={handleSubmit(subscription)}
+                        className='flex flex-col gap-y-3'
+                    >
+                        <div className="text-2xl">✉️</div>
+                        <h2 className='font-bold text-base text-white leading-snug'>
+                            Đừng bỏ lỡ những bài viết hay nhất!
+                        </h2>
+                        <p className="text-amber-100 text-sm">
+                            Mỗi tuần, chúng mình gửi tổng hợp bài viết đáng đọc nhất vào hộp thư của bạn.
+                        </p>
+                        <input
+                            name="email"
+                            type='email'
+                            {...register('email', { required: "Vui lòng nhập email!" })}
+                            required
+                            placeholder='Email của bạn'
+                            className='rounded-lg px-3 py-2 text-sm border-0 focus:outline-none focus:ring-2 focus:ring-white/50 bg-white/90 placeholder-gray-400'
+                        />
+                        <button
+                            type='submit'
+                            className='w-full bg-white text-amber-600 font-bold py-2 rounded-lg text-sm hover:bg-amber-50 transition-colors shadow-sm'
+                        >
+                            ĐĂNG KÝ NGAY
+                        </button>
+                    </form>
+                </div>
             </div>
             <ToastContainer />
         </>

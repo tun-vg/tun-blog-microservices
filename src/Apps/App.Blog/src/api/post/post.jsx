@@ -11,12 +11,12 @@ export const getTopPosts = (size) => {
 }
 
 export const getFeaturedPosts = () => {
-    const url = `/post-api/post/get-posts?page=1&pageSize=4`;
+    const url = `/post-api/post/get-posts?page=1&pageSize=4&status=1`;
     return API.get(url);
 }
 
 export const getRecommendedPosts = () => {
-    const url = `/post-api/post/get-posts?page=1&pageSize=10`;
+    const url = `/post-api/post/get-posts?page=1&pageSize=10&status=1`;
     return API.get(url);
 }
 
@@ -27,7 +27,8 @@ export const getPostsById = (postId) => {
 
 export const addPost = (post) => {
     const url = `/post-api/post/create-post`;
-    return API.postForm(url, post);
+    // return API.postForm(url, post);
+    return API.post(url, post);
 }
 
 export const updatePost = (post) => {
@@ -35,13 +36,13 @@ export const updatePost = (post) => {
     return API.put(url, post);
 }
 
-export const getPosts = (paging) => {
-    const url = `/post-api/post/get-posts?page=${paging.page}&pageSize=${paging.pageSize}&search=${paging.search}&sortBy=${paging.sortBy}&isDescending=${paging.isDescending}`;
+export const getPosts = (paging, status) => {
+    const url = `/post-api/post/get-posts?page=${paging.page}&pageSize=${paging.pageSize}&search=${paging.search}&sortBy=${paging.sortBy}&status=${status}&isDescending=${paging.isDescending}`;
     return API.get(url);
 }
 
-export const getPostsByUserId = (page, pageSize, userId) => {
-    const url = `/post-api/post/get-posts-by-userId?page=${page}&pageSize=${pageSize}&userId=${userId}`;
+export const getPostsByUserId = (page, pageSize, userId, status = 1) => {
+    const url = `/post-api/post/get-posts-by-userId?page=${page}&pageSize=${pageSize}&userId=${userId}&status=${status}`;
     return API.get(url);
 }
 
@@ -83,4 +84,9 @@ export const checkUserBookMarkPost = (data) => {
 export const getBookMarkPostByUserId = (page, pageSize, userId) => {
     const url = `/post-api/post/get-book-mark-posts?page=${page}&pageSize=${pageSize}&userId=${userId}`;
     return API.get(url);
+}
+
+export const deletePost = (postId) => {
+    const url = `/post-api/post/delete-post/${postId}`;
+    return API.delete(url);
 }

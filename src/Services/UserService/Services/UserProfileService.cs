@@ -60,4 +60,14 @@ public class UserProfileService : IUserProfileService
         
         return userProfile;
     }
+    
+    public async Task<List<UserProfileExtend>> GetUserProfilesByIdsAsync(List<string> userIds)
+    {
+        var userProfiles = await _dbContext.UserProfileExtends
+            .AsNoTracking()
+            .Where(u => userIds.Contains(u.UserId))
+            .ToListAsync();
+
+        return userProfiles;
+    }
 }

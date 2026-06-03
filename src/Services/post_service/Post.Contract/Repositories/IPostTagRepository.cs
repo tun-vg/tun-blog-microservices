@@ -12,4 +12,8 @@ public interface IPostTagRepository
     Task SavePostTag(List<PostTag> postTags);
 
     Task<List<PostTag>> GetPostTagsByPostId(Guid postId);
+    
+    Task DeletePostTagByPostId(Guid postId);
+    
+    Task DeletePostTagByTagId(Guid tagId);
 }

@@ -52,7 +52,7 @@ const PostManagementPage = () => {
     const [dataPosts, setDataPosts] = useState();
 
     const getDataPosts = async () => {
-        const result = await getPosts(paging);
+        const result = await getPosts(paging, 1);
         setDataPosts(result.items);
     }
 

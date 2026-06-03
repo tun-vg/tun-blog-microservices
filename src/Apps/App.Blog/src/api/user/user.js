@@ -30,3 +30,13 @@ export const registerUser = (data) => {
     const url = `/user-api/user/register`;
     return API.post(url, data);
 }
+
+export const getUserFollowersAPI = (userId) => {
+    const url = `/user-api/user-follow/get-followers/${userId}`;
+    return API.get(url);
+}
+
+export const getUserFollowingsAPI = (userId) => {
+    const url = `/user-api/user-follow/get-followings/${userId}`;
+    return API.get(url);
+}

@@ -47,4 +47,26 @@ public static class UserMappingExtensions
         
         return userDto;
     }
+    
+    public static List<UserDto> ToUserDtos(
+        IEnumerable<UserRepresentation> userRepresentations, 
+        IEnumerable<UserProfileExtend> userProfileExtends, 
+        IEnumerable<UserFollowDto>? follows)
+    {
+        var userDtos = new List<UserDto>();
+        
+        foreach (var userRepresentation in userRepresentations)
+        {
+            var userProfileExtend = userProfileExtends.FirstOrDefault(u => u.UserId == userRepresentation.Id);
+            if (userProfileExtend == null)
+                continue;
+            
+            var userFollows = follows?.Where(f => f.FollowingId == userRepresentation.Id).ToList() ?? new List<UserFollowDto>();
+            
+            var userDto = ToUserDto(userRepresentation, userProfileExtend, userFollows);
+            userDtos.Add(userDto);
+        }
+        
+        return userDtos;
+    }
 }

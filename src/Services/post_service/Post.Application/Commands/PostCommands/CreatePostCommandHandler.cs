@@ -50,7 +50,8 @@ public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, Resul
             AuthorId = command.AuthorId,
             CategoryId = command.CategoryId,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            Status = command.Status
         };
         await _postRepository.SavePost(post);
 
@@ -75,19 +76,23 @@ public class CreatePostCommandHandler : IRequestHandler<CreatePostCommand, Resul
             }
         }
         await _postTagRepository.SavePostTag(postTags);
-
-        var postAuthor = new PostAuthor()
-        {
-            PostAuthorId = Guid.NewGuid(),
-            AuthorId = command.AuthorId,
-            Email = command.Email,
-            UserName = command.UserName,
-            FirstName = command.FirstName,
-            LastName = command.LastName,
-            AvatarUrl = command.AvatarUrl
-        };
         
-        await _postAuthorRepository.CreatePostAuthor(postAuthor);
+        var postAuthor = await _postAuthorRepository.GetPostAuthorByUserId(command.AuthorId.ToString());
+        if (postAuthor == null)
+        {
+            postAuthor = new PostAuthor()
+            {
+                PostAuthorId = Guid.NewGuid(),
+                AuthorId = command.AuthorId,
+                Email = command.Email,
+                UserName = command.UserName,
+                FirstName = command.FirstName,
+                LastName = command.LastName,
+                AvatarUrl = command.AvatarUrl
+            };
+
+            await _postAuthorRepository.CreatePostAuthor(postAuthor);
+        }
 
         PostDto postDto = _mapper.Map<PostDto>(post);
         postDto.ImageUrl = imageUrl;

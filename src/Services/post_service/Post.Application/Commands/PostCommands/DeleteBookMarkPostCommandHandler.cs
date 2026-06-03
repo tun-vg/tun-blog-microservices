@@ -5,15 +5,15 @@ namespace Post.Application.Commands.PostCommands;
 
 public class DeleteBookMarkPostCommandHandler : IRequestHandler<DeleteBookMarkPostCommand, bool>
 {
-    private readonly IPostRepository _postRepository;
+    private readonly IPostBookMarkRepository _postBookMarkRepository;
     
-    public DeleteBookMarkPostCommandHandler(IPostRepository postRepository)
+    public DeleteBookMarkPostCommandHandler(IPostBookMarkRepository postBookMarkRepository)
     {
-        _postRepository = postRepository;
+        _postBookMarkRepository = postBookMarkRepository;
     }
 
     public async Task<bool> Handle(DeleteBookMarkPostCommand request, CancellationToken cancellationToken)
     {
-        return await _postRepository.RemoveBookMarkPost(request.PostId, request.UserId);
+        return await _postBookMarkRepository.RemoveBookMarkPost(request.PostId, request.UserId);
     }
 }

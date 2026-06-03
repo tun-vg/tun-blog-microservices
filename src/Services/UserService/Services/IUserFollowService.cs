@@ -9,5 +9,7 @@ public interface IUserFollowService
     
     Task UnfollowUserAsync(UserFollowDto userFollowDto);
     
-    Task<IEnumerable<UserFollowDto>> GetFollowersAsync(string userId);
+    Task<List<UserFollowDto>> GetFollowersAsync(string userId);
+    
+    Task<List<UserFollowDto>> GetFollowingsAsync(string userId);
 }

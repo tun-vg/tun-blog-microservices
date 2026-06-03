@@ -175,4 +175,36 @@ public class KeycloakUserService : IKeycloakUserService
             throw new Exception($"Failed to update user: {result.StatusCode} - {errorContent}");
         }
     }
+
+    public async Task<List<UserDto>> GetFollowersAsync(string userId)
+    {
+        string realm = _keycloakConfiguration.Realm;
+        var userFollowsDtos = await _userFollowService.GetFollowersAsync(userId);
+        var searchQuery = "id:";
+        searchQuery += string.Join(" ", userFollowsDtos.Select(u => u.FollowerId));
+        var users = await _keycloakClient.GetUsersAsync(realm, new GetUsersRequestParameters()
+        {
+            Search = searchQuery
+        });
+        
+        var userProfiles = await _userProfileService.GetUserProfilesByIdsAsync(userFollowsDtos.Select(u => u.FollowerId).ToList());
+        var userDtos = UserMappingExtensions.ToUserDtos(users, userProfiles, null);
+        return userDtos;
+    }
+
+    public async Task<List<UserDto>> GetFollowingAsync(string userId)
+    {
+        string realm = _keycloakConfiguration.Realm;
+        var userFollowingDtos = await _userFollowService.GetFollowingsAsync(userId);
+        var searchQuery = "id:";
+        searchQuery += string.Join(" ", userFollowingDtos.Select(u => u.FollowingId));
+        var users = await _keycloakClient.GetUsersAsync(realm, new GetUsersRequestParameters()
+        {
+            Search = searchQuery
+        });
+        
+        var userProfiles = await _userProfileService.GetUserProfilesByIdsAsync(userFollowingDtos.Select(u => u.FollowingId).ToList());
+        var userDtos = UserMappingExtensions.ToUserDtos(users, userProfiles, null);
+        return userDtos;
+    }
 }

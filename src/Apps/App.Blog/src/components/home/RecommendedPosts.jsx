@@ -30,32 +30,32 @@ const RecommendedPosts = () => {
     }, [])
 
     return (
-        <>
-            <div className="py-5">
-                <div className='flex gap-x-8'>
-                    <div>
-                        <div className={`${!classification ? ' font-bold' : ''} pl-2 pr-2 hover:cursor-pointer`} onClick={() => { changeClassification(false) }}>Dành cho bạn</div>
-                        <div className={`${!classification ? 'bg-blue-500' : ''} h-1 w-full`}></div>
-                    </div>
-                    <div>
-                        <div className={`${classification ? ' font-bold' : ''} pl-2 pr-2 hover:cursor-pointer`} onClick={() => { changeClassification(true) }}>Đánh giá cao nhất</div>
-                        <div className={`${classification ? 'bg-blue-500' : ''} h-1 w-full`}></div>
-                    </div>
-                </div>
-                <hr className='w-[65%]' />
-                <div className="grid gap-4">
-                    {data.map((p) => {
-                        return <PostListCard key={p.postId} post={p} showAction={true}/>
-                    })}
-                </div>
-                {/* Pagination */}
-                <div>
-                    <div>
-                        <Pagination page={page} count={data.length} onPageChange={changedPage} />
-                    </div>
-                </div>
+        <div className="py-6 border-t border-gray-100">
+            <div className='flex gap-x-1 mb-1 border-b border-gray-200'>
+                <button
+                    className={`pb-2 px-4 text-sm font-semibold transition-colors relative ${!classification ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                    onClick={() => changeClassification(false)}
+                >
+                    Dành cho bạn
+                    {!classification && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-full"></span>}
+                </button>
+                <button
+                    className={`pb-2 px-4 text-sm font-semibold transition-colors relative ${classification ? 'text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                    onClick={() => changeClassification(true)}
+                >
+                    Đánh giá cao nhất
+                    {classification && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-500 rounded-full"></span>}
+                </button>
             </div>
-        </>
+            <div className="grid gap-2 mt-2">
+                {data.map((p) => (
+                    <PostListCard key={p.postId} post={p} showAction={true} />
+                ))}
+            </div>
+            <div className="mt-4">
+                <Pagination page={page} count={data.length} onPageChange={changedPage} />
+            </div>
+        </div>
     )
 }
 

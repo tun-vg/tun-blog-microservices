@@ -11,4 +11,8 @@ public interface IKeycloakUserService
     Task<UserDto> UpdateUserAsync(UserDto user);
     
     Task CreateUserAsync(CreateUserRequest createUserRequest);
+    
+    Task<List<UserDto>> GetFollowersAsync(string userId);
+    
+    Task<List<UserDto>> GetFollowingAsync(string userId);
 }

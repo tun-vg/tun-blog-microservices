@@ -25,7 +25,7 @@ public class GetPostsQueryHandler : IRequestHandler<GetPostsQuery, PagedResult<P
             page, 
             pageSize, 
             request.Search, 
-            request.SortBy, 
+            request.SortBy,
             request.IsDescending
         );
         var postDtos = _mapper.Map<List<PostDto>>(posts);

@@ -18,27 +18,26 @@ const FeaturedPosts = () => {
     }, [])
 
     return (
-        <>
-            <div className='w-full py-5'>
-                <div className='flex gap-x-5'>
-                    <div className='font-bold hover:cursor-pointer'>NỔI BẬT TRONG THÁNG</div>
-                    <div className='w-[2px] bg-gray-300'></div>
-                    <Link 
-                        to={`top-posts`}
-                        className='text-gray-600 hover:cursor-pointer'
-                    >
-                        Xem TOP 10 bài viết
-                    </Link>
+        <div className='w-full py-6 border-t border-gray-100'>
+            <div className='flex items-center justify-between mb-5'>
+                <div className="flex items-center gap-3">
+                    <div className="w-1 h-6 bg-orange-500 rounded-full"></div>
+                    <h2 className='font-bold text-lg tracking-wide text-gray-800'>NỔI BẬT TRONG THÁNG</h2>
                 </div>
-
-                <div className='grid grid-cols-4 gap-x-7 mt-2'>
-                    {data.map((p) => {
-                        return <PostListColCard key={p.postId} post={p} showAuthor={true} />
-                    })}
-
-                </div>
+                <Link
+                    to={`top-posts`}
+                    className='text-sm text-amber-600 hover:text-amber-800 font-medium flex items-center gap-1 transition-colors'
+                >
+                    Xem TOP 10 bài viết →
+                </Link>
             </div>
-        </>
+
+            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5'>
+                {data.map((p) => (
+                    <PostListColCard key={p.postId} post={p} showAuthor={true} />
+                ))}
+            </div>
+        </div>
     )
 }
 

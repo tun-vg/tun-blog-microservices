@@ -27,6 +27,10 @@ const CategoryManagementPage = lazy(
   () => import('../../pages/admins/categories/CategoryManagementPage')
 )
 
+const EditPostPage = lazy(
+  () => import('../../pages/clients/EditPostPage')
+)
+
 const privateRoutes = [
   {
     path: 'app',
@@ -81,6 +85,11 @@ const privateRoutes = [
       {
         path: 'create',
         element: <CreatePostPage />,
+        access: ['ADMIN', 'USER'],
+      },
+      {
+        path: 'edit/:postId',
+        element: <EditPostPage />,
         access: ['ADMIN', 'USER'],
       },
     ]
