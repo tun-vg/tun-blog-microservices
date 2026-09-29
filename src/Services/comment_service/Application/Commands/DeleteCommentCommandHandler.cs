@@ -1,5 +1,6 @@
 using comment_service.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Shared.BuildingBlocks.Exceptions;
 using System.Runtime.InteropServices;
 
 namespace comment_service.Application.Commands;
@@ -36,6 +37,6 @@ public class DeleteCommentCommandHandler : ICommandHandler<DeleteCommentCommand,
 
             return rowChanged == 1;
         }
-        else throw new Exception("Comment not found");
+        else throw new NotFoundException("Comment not found");
     }
 }

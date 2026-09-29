@@ -1,5 +1,6 @@
 ﻿using comment_service.Common.Interfaces;
 using comment_service.Entities;
+using Shared.BuildingBlocks.Exceptions;
 using System.Transactions;
 
 namespace comment_service.Application.Commands;
@@ -19,7 +20,7 @@ public class LikeCommentCommandHandler : ICommandHandler<LikeCommentCommand, boo
 
         var comment = await _context.Comments.FindAsync(command.CommentId);
         if (comment == null)
-            throw new Exception("Comment not found");
+            throw new NotFoundException("Comment not found");
         
         comment.LikedCount++;
         

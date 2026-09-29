@@ -46,22 +46,14 @@ public class EmailService : IEmailService
         
         foreach (var subcriber in subcribers)
         {
-            try
+            var emailMessage = new EmailMessage()
             {
-                var emailMessage = new EmailMessage()
-                {
-                    ToEmail = subcriber.Email,
-                    FromEmail = "admin.tun.blog@gmail.com",
-                    Posts = trendingPosts
-                };
-                
-                await _rabbitMqProducer.PublishAsync("email_weekly", JsonSerializer.SerializeToUtf8Bytes(emailMessage));
-                
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+                ToEmail = subcriber.Email,
+                FromEmail = "admin.tun.blog@gmail.com",
+                Posts = trendingPosts
+            };
+            
+            await _rabbitMqProducer.PublishAsync("email_weekly", JsonSerializer.SerializeToUtf8Bytes(emailMessage));
         }
     }
 
@@ -149,13 +141,12 @@ public class EmailService : IEmailService
             await smtp.AuthenticateAsync(_mailSettings.Mail, _mailSettings.Password);
             await smtp.SendAsync(email);
         }
-        catch (Exception ex)
-        {
-            throw new Exception(ex.Message);
-        }
         finally
         {
-            await smtp.DisconnectAsync(true);
+            if (smtp.IsConnected)
+            {
+                await smtp.DisconnectAsync(true);
+            }
         }
     }
 }

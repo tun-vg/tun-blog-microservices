@@ -1,5 +1,6 @@
 using comment_service.Common.Interfaces;
 using comment_service.Entities;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace comment_service.Application.Commands;
 
@@ -36,7 +37,7 @@ public class UpdateCommentCommandHandler : ICommandHandler<UpdateCommentCommand,
         }
         else
         {
-            throw new Exception("Comment not found");
+            throw new NotFoundException("Comment not found");
         }
     }
 }

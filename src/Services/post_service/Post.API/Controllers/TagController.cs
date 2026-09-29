@@ -4,6 +4,7 @@ using Post.Domain.Entities;
 using Post.Application.Queries.TagQueries;
 using Post.Application.Commands.TagCommands;
 using System.Threading.Tasks;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace Post.API.Controllers;
 
@@ -44,7 +45,7 @@ public class TagController : ControllerBase
     {
         if (command == null)
         {
-            return BadRequest("Tag cannot be null!");
+            throw new BadRequestException("Tag cannot be null!");
         }
         var result = await _mediator.Send(command);
         return Ok(result);
@@ -55,7 +56,7 @@ public class TagController : ControllerBase
     {
         if (command == null)
         {
-            return BadRequest("Tag cannot be null!");
+            throw new BadRequestException("Tag cannot be null!");
         }
         var result = await _mediator.Send(command);
         return Ok(result);

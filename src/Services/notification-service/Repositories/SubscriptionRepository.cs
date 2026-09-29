@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using NotificationService.Entities;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace NotificationService.Repositories;
 
@@ -33,7 +34,7 @@ public class SubscriptionRepository : ISubscriptionRepository
     {
         var userSubscription = await _context.UserSubscriptions.Where(u => u.Email == email).FirstOrDefaultAsync();
         
-        if (userSubscription == null) throw new Exception("UserSubscription not found");
+        if (userSubscription == null) throw new NotFoundException("UserSubscription not found");
         
         _context.UserSubscriptions.Remove(userSubscription);
         await _context.SaveChangesAsync();

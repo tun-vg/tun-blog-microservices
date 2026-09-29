@@ -34,4 +34,9 @@
 	<ItemGroup>
 		<Protobuf Include="Protos/file_service.proto" GrpcServices="Server" />
 	</ItemGroup>
+
+
+		<ItemGroup>
+		  <ProjectReference Include="..\..\Shared\Shared.BuildingBlocks\Shared.BuildingBlocks.csproj" />
+		</ItemGroup>
 </Project>

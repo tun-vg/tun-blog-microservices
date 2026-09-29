@@ -6,6 +6,7 @@ using comment_service.Messaging.RabbitMQ;
 using comment_service.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.BuildingBlocks.Exceptions;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -70,9 +71,10 @@ builder.Services.AddCors(options =>
                    .AllowAnyHeader();
         });
 });
+builder.Services.AddGlobalExceptionHandling();
 
 var app = builder.Build();
-
+app.UseGlobalExceptionHandling();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

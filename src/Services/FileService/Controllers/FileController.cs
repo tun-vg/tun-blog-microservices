@@ -1,5 +1,6 @@
 ﻿using FileService.Services;
 using Microsoft.AspNetCore.Mvc;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace FileService.Controllers;
 
@@ -18,7 +19,7 @@ public class FileController : ControllerBase
     public async Task<IActionResult> Upload(IFormFile file, [FromQuery] string folder = "default")
     {
         if (file == null || file.Length == 0)
-            return BadRequest("File is missing.");
+            throw new BadRequestException("File is missing.");
 
         var url = await _fileService.UploadAsync(file, folder);
         return Ok(new { Url = url });
@@ -28,7 +29,7 @@ public class FileController : ControllerBase
     public async Task<IActionResult> Delete([FromQuery] string publicId)
     {
         if (string.IsNullOrEmpty(publicId))
-            return BadRequest("Public ID is required.");
+            throw new BadRequestException("Public ID is required.");
 
         await _fileService.DeleteAsync(publicId);
         return NoContent();

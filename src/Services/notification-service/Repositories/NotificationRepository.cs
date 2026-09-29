@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NotificationService.Entities;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace NotificationService.Repositories;
 
@@ -22,7 +23,7 @@ public class NotificationRepository : INotificationRepository
             return rowDeleted == 1;
         }
         else
-            throw new Exception($"Couldn't found notification by id: {notificationId}");
+            throw new NotFoundException($"Couldn't find notification by id: {notificationId}");
     }
 
     public async Task<bool> DeleteNotificationsByUserId(Guid userId)

@@ -2,6 +2,7 @@
 using Keycloak.AuthServices.Sdk.Admin.Models;
 using Keycloak.AuthServices.Sdk.Admin.Requests.Users;
 using Microsoft.Extensions.Options;
+using Shared.BuildingBlocks.Exceptions;
 using UserService.Commons;
 using UserService.Dtos;
 using UserService.Entities;
@@ -42,7 +43,7 @@ public class KeycloakUserService : IKeycloakUserService
         var users = await _keycloakClient.GetUsersAsync(realm, parameters);
         var user = users.FirstOrDefault();
         if (user == null) 
-            throw new Exception($"User {username} not found");
+            throw new NotFoundException($"User {username} not found");
         
         var userProfileExtend = await _userProfileService.GetUserProfileExtend(user.Id);
 
@@ -73,7 +74,7 @@ public class KeycloakUserService : IKeycloakUserService
         var user = await _keycloakClient.GetUserAsync(realm, userId);
         
         if (user == null) 
-            throw new Exception($"User not found with id: {userId}");
+            throw new NotFoundException($"User not found with id: {userId}");
         
         var userProfileExtend = await _userProfileService.GetUserProfileExtend(user.Id);
 
@@ -107,7 +108,7 @@ public class KeycloakUserService : IKeycloakUserService
         if (!result.IsSuccessStatusCode)
         {
             var errorContent = await result.Content.ReadAsStringAsync();
-            throw new Exception($"Failed to update user: {result.StatusCode} - {errorContent}");
+            throw new BadRequestException($"Failed to update user: {result.StatusCode} - {errorContent}");
         }
         
         var userProfileExtend = await _userProfileService.GetUserProfileExtend(userDto.UserId);
@@ -172,7 +173,7 @@ public class KeycloakUserService : IKeycloakUserService
         if (!result.IsSuccessStatusCode)
         {
             var errorContent = await result.Content.ReadAsStringAsync();
-            throw new Exception($"Failed to update user: {result.StatusCode} - {errorContent}");
+            throw new BadRequestException($"Failed to create user: {result.StatusCode} - {errorContent}");
         }
     }
 

@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Shared\Shared.BuildingBlocks\Shared.BuildingBlocks.csproj" />
     <ProjectReference Include="..\Post.Contract\Post.Contract.csproj" />
     <ProjectReference Include="..\Post.Domain\Post.Domain.csproj" />
   </ItemGroup>

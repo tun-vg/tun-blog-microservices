@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Shared.BuildingBlocks.Exceptions;
 using UserService.Dtos;
 using UserService.Entities;
 
@@ -25,6 +26,12 @@ public class UserFollowService : IUserFollowService
         var userFollower = await _dbContext.UserProfileExtends
             .Where(u => u.UserId == userFollowDto.FollowerId)
             .FirstOrDefaultAsync();
+
+        if (userFollowing == null)
+            throw new NotFoundException($"User not found with id: {userFollowDto.FollowingId}");
+
+        if (userFollower == null)
+            throw new NotFoundException($"User not found with id: {userFollowDto.FollowerId}");
 
         UserFollow userFollow = new UserFollow
         {
@@ -53,7 +60,17 @@ public class UserFollowService : IUserFollowService
         
         var userFollow = await _dbContext.UserFollows
             .Where(u => u.FollowerId == userFollowDto.FollowerId)
+            .Where(u => u.FollowingId == userFollowDto.FollowingId)
             .FirstOrDefaultAsync();
+
+        if (userFollowing == null)
+            throw new NotFoundException($"User not found with id: {userFollowDto.FollowingId}");
+
+        if (userFollower == null)
+            throw new NotFoundException($"User not found with id: {userFollowDto.FollowerId}");
+
+        if (userFollow == null)
+            throw new NotFoundException("Follow relationship not found");
         
         _dbContext.UserFollows.Remove(userFollow);
         

@@ -3,6 +3,7 @@ using Keycloak.AuthServices.Common;
 using Keycloak.AuthServices.Sdk;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Shared.BuildingBlocks.Exceptions;
 using UserService;
 using UserService.Commons;
 using UserService.RabbitMQ;
@@ -93,9 +94,10 @@ builder.Services.AddSingleton<RabbitMqConfig>(cfg =>
 builder.Services.AddScoped<IRabbitMqProducer, RabbitMqProducer>();
 
 builder.Services.AddAutoMapper(typeof(ProfileMapper));
+builder.Services.AddGlobalExceptionHandling();
 
 var app = builder.Build();
-
+app.UseGlobalExceptionHandling();
 app.MapGrpcService<UserGrpcService>();
 
 // Configure the HTTP request pipeline.

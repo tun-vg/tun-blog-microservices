@@ -10,6 +10,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using Post.Contract.Services;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace Post.Application.Queries.PostQueries;
 
@@ -44,7 +45,7 @@ public class SearchPostsQueryHandler : IRequestHandler<SearchPostsQuery, PagedRe
         }
         else
         {
-            throw new Exception("Invalid type search");
+            throw new BadRequestException("Invalid type search");
         }
     }
 }

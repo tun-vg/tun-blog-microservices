@@ -1,11 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Post.Contract.Repositories;
 using Post.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace Post.Persistence.Repositories;
 
@@ -115,7 +111,7 @@ public class PostRepository : IPostRepository
         {
             return result;
         }
-        else throw new Exception($"Couldn't found post by id: {id}");
+        else throw new NotFoundException($"Couldn't find post by id: {id}");
     }
 
     public async Task<List<Post.Domain.Entities.Post>> GetTrendingPostsWithTime(int month, int year, int size)
@@ -293,7 +289,7 @@ public class PostRepository : IPostRepository
             _context.Posts.Remove(entity);
             return await _context.SaveChangesAsync() > 0 ? true : false;
         }
-        else throw new Exception($"Coun't found post by id: {id}");
+        else throw new NotFoundException($"Couldn't find post by id: {id}");
     }
 
     public async Task SavePost(Post.Domain.Entities.Post entity)
@@ -315,7 +311,7 @@ public class PostRepository : IPostRepository
 
             await _context.SaveChangesAsync();
         }
-        else throw new Exception($"Coun't found post by id: {post.PostId}");
+        else throw new NotFoundException($"Couldn't find post by id: {post.PostId}");
     }
 
     #endregion Commands Post
@@ -416,7 +412,7 @@ public class PostRepository : IPostRepository
             await _context.SaveChangesAsync();
             point = post.Point;
         }
-        else throw new Exception("Post not found");
+        else throw new NotFoundException("Post not found");
         
         return (point, action);
     }

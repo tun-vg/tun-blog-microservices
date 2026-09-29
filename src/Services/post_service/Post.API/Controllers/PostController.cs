@@ -1,9 +1,9 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Post.API.Dtos;
 using Post.Application.Commands.PostCommands;
 using Post.Application.Queries.PostQueries;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace Post.API.Controllers;
 
@@ -65,7 +65,7 @@ public class PostController : ControllerBase
     {
         if (command == null)
         {
-            return BadRequest();
+            throw new BadRequestException("Post command cannot be null.");
         }
         var result = await _mediator.Send(command);
         return Ok(result);

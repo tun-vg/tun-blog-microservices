@@ -6,6 +6,7 @@ using Post.Infrastructure;
 using Post.Infrastructure.Services;
 using Post.Persistence;
 using Post.Persistence.Repositories;
+using Shared.BuildingBlocks.Exceptions;
 
 // Enable HTTP/2 unencrypted support for gRPC calls over plain HTTP (required for development)
 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
@@ -57,10 +58,12 @@ builder.Services.AddCors(options =>
         });
 });
 builder.Services.AddGrpc();
+// Global Exception
+builder.Services.AddGlobalExceptionHandling();
 
 
 var app = builder.Build();
-
+app.UseGlobalExceptionHandling();
 app.MapGrpcService<PostGrpcService>();
 app.MapGet("/", () => "This is gRPC PostService");
 

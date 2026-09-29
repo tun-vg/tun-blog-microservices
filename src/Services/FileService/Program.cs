@@ -3,6 +3,7 @@ using FileService.Repository;
 using FileService.Services;
 using FileService.Services.Config;
 using Microsoft.EntityFrameworkCore;
+using Shared.BuildingBlocks.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,10 +38,12 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod();
         });
 });
+builder.Services.AddGlobalExceptionHandling();
 
 var app = builder.Build();
 
 app.MapGrpcService<FileGrpcService>();
+app.UseGlobalExceptionHandling();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

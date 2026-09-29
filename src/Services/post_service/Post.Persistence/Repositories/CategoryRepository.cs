@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Post.Contract.Repositories;
 using Post.Domain.Entities;
+using Shared.BuildingBlocks.Exceptions;
 
 namespace Post.Persistence.Repositories;
 
@@ -26,7 +27,7 @@ public class CategoryRepository : ICategoryRepository
         var category = await _context.Categories.FindAsync(id);
         if (category == null)
         {
-            throw new Exception($"Category with ID {id} not found.");
+            throw new NotFoundException($"Category with ID {id} not found.");
         }
         return category;
     }
@@ -54,7 +55,7 @@ public class CategoryRepository : ICategoryRepository
         var category = _context.Categories.Find(id);
         if (category == null)
         {
-            throw new Exception($"Category with ID {id} not found.");
+            throw new NotFoundException($"Category with ID {id} not found.");
         }
         else
         {

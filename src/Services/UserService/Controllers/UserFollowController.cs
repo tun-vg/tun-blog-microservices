@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Dtos;
 using UserService.Services;
@@ -37,28 +36,14 @@ public class UserFollowController : ControllerBase
     [HttpGet("get-followers/{userId}")]
     public async Task<IActionResult> GetFollowers([FromRoute] string userId)
     {
-        try
-        {
-            var followers = await _keycloakUserService.GetFollowersAsync(userId);
-            return Ok(followers);
-        }
-        catch (Exception e)
-        {
-            return NotFound(e.Message);
-        }
+        var followers = await _keycloakUserService.GetFollowersAsync(userId);
+        return Ok(followers);
     }
 
     [HttpGet("get-followings/{userId}")]
     public async Task<IActionResult> GetFollowings([FromRoute] string userId)
     {
-        try
-        {
-            var followings = await _keycloakUserService.GetFollowingAsync(userId);
-            return Ok(followings);
-        }
-        catch (Exception e)
-        {
-            return NotFound(e.Message);
-        }
+        var followings = await _keycloakUserService.GetFollowingAsync(userId);
+        return Ok(followings);
     }
 }

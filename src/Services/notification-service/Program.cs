@@ -12,6 +12,7 @@ using NotificationService.Hubs;
 using NotificationService.RabbitMQ;
 using NotificationService.Repositories;
 using NotificationService.Services;
+using Shared.BuildingBlocks.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -147,9 +148,10 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
+builder.Services.AddGlobalExceptionHandling();
 
 var app = builder.Build();
-
+app.UseGlobalExceptionHandling();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
