@@ -7,7 +7,7 @@ EXPOSE 5271
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
+WORKDIR /src/src/Services/post_service
 
 COPY ["src/Services/post_service/Post.API/Post.API.csproj", "Post.API/"]
 COPY ["src/Services/post_service/Post.Application/Post.Application.csproj", "Post.Application/"]
@@ -15,11 +15,13 @@ COPY ["src/Services/post_service/Post.Domain/Post.Domain.csproj", "Post.Domain/"
 COPY ["src/Services/post_service/Post.Contract/Post.Contract.csproj", "Post.Contract/"]
 COPY ["src/Services/post_service/Post.Infrastructure/Post.Infrastructure.csproj", "Post.Infrastructure/"]
 COPY ["src/Services/post_service/Post.Persistence/Post.Persistence.csproj", "Post.Persistence/"]
+COPY ["src/Shared/Shared.BuildingBlocks/Shared.BuildingBlocks.csproj", "../../Shared/Shared.BuildingBlocks/"]
 
 RUN dotnet restore "./Post.API/Post.API.csproj"
 COPY src/Services/post_service/ .
+COPY src/Shared/Shared.BuildingBlocks/ ../../Shared/Shared.BuildingBlocks/
 
-WORKDIR "/src/Post.API"
+WORKDIR "/src/src/Services/post_service/Post.API"
 RUN dotnet build "./Post.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

@@ -7,11 +7,13 @@ EXPOSE 5001
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
+WORKDIR /src/src/Services
 COPY ["src/Services/FileService/FileService.csproj", "FileService/"]
+COPY ["src/Shared/Shared.BuildingBlocks/Shared.BuildingBlocks.csproj", "../Shared/Shared.BuildingBlocks/"]
 RUN dotnet restore "./FileService/FileService.csproj"
 COPY src/Services/FileService FileService/
-WORKDIR "/src/FileService"
+COPY src/Shared/Shared.BuildingBlocks/ ../Shared/Shared.BuildingBlocks/
+WORKDIR "/src/src/Services/FileService"
 RUN dotnet build "./FileService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

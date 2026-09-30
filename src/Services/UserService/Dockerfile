@@ -7,11 +7,13 @@ EXPOSE 7083
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["src/Services/UserService/UserService.csproj", "user-service/"]
-RUN dotnet restore "user-service/UserService.csproj"
-COPY src/Services/UserService/ user-service/
-WORKDIR "/src/user-service"
+WORKDIR /src/src/Services
+COPY ["src/Services/UserService/UserService.csproj", "UserService/"]
+COPY ["src/Shared/Shared.BuildingBlocks/Shared.BuildingBlocks.csproj", "../Shared/Shared.BuildingBlocks/"]
+RUN dotnet restore "UserService/UserService.csproj"
+COPY src/Services/UserService/ UserService/
+COPY src/Shared/Shared.BuildingBlocks/ ../Shared/Shared.BuildingBlocks/
+WORKDIR "/src/src/Services/UserService"
 RUN dotnet build "./UserService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
